@@ -55,15 +55,11 @@ lower_or_upper <- function(data, bound, cor_type='normal'){
   #### Use "Correlation" or "Partial Correlation"
   if(cor_type == 'normal'){
     g <- 0
-    corr_matrix <- cor(data)
-  }
+    corr_matrix <- cor(data) }
   if(cor_type == 'partial'){
     g <- D-2
-    v <- diag(var(data))
-    corr_matrix <- - cov(data) / sqrt(v %*% t(v))
-  }
-  
-  
+    v <- 1 / diag(var(data))
+    corr_matrix <- - solve(cov(data)) / sqrt(v %*% t(v)) }
   
   #### Computing Fisher Z-Transform
   Z_j_k_td <- (1/2)*log((1+corr_matrix)/(1-corr_matrix))
@@ -77,7 +73,7 @@ lower_or_upper <- function(data, bound, cor_type='normal'){
   Lower_bound <- (exp(2*Log_lower) - 1 ) /   ((exp(2*Log_lower) + 1))
   Upper_bound <- (exp(2*Log_upper) - 1 ) /   ((exp(2*Log_upper) + 1)) 
   
-  #### Remove na (on diagonal)
+  #### Remove NA (on diagonal)
   Lower_bound[is.na(Lower_bound)] = 1
   Upper_bound[is.na(Upper_bound)] = 1
   
