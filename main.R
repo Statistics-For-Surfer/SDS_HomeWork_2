@@ -49,7 +49,7 @@ library(igraph)
 
 # DATA --------------------------------------------------------------------
 
-load('hw2_data.RData')
+load('data/hw2_data.RData')
 
 
 
@@ -179,7 +179,7 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2){
   
   
   #### Import ROI coordinates
-  load('coordinates.RData')
+  load('data/coordinates.RData')
   coord <- aal116coordinates
   
   if(dimensions == 2){
@@ -187,7 +187,7 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2){
     par(mfrow=c(1,2))
     layout <- matrix(c(coord$x.mni, coord$y.mni), 116,2)
     
-    my_image <- readJPEG("brain.jpg")
+    my_image <- readJPEG("images/brain.jpg")
     
     for(graph in list(g1,g2)){
       
