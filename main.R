@@ -44,7 +44,6 @@ rm(list=ls())
 library(jpeg)
 library(ppcor)
 library(igraph)
-library(JointNets)
 
 
 
@@ -180,7 +179,7 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2){
   
   
   #### Import ROI coordinates
-  data(aal116coordinates)
+  load('coordinates.RData')
   coord <- aal116coordinates
   
   if(dimensions == 2){
