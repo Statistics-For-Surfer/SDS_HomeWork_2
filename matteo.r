@@ -45,6 +45,8 @@ rm(list=ls())
 library(jpeg)
 library(ppcor)
 library(igraph)
+library(htmlwidgets)
+library(animation)
 
 
 

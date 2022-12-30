@@ -1,12 +1,13 @@
 rm(list=ls())
-
+??read_html
 # Importing data.
 load('data/hw2_data.RData')
 # PACKAGES ----------------------------------------------------------------
-
+??saveHTML
 library(jpeg)
 library(ppcor)
 library(igraph)
+
 
 # DATA CLEANING -----------------------------------------------------------
 
@@ -212,4 +213,21 @@ plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2){
 
 
 plot_graphs(TD, ASD ,t = .6 , dimensions=2)
+
+plot_frame <- function(i) {
+  plot_graphs(TD, ASD ,t = i , dimensions=2)
+  
+}
+ani.options(interval = 0.5, nmax = 50, loop = TRUE)
+
+th <- seq(from = 0 , to = .5 , by = .1)
+
+
+saveHTML({
+  for (i in th) {
+    plot_frame(i)
+  }
+}, file = "myanimation.html")
+
+
 

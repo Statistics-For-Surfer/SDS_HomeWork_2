@@ -1,7 +1,7 @@
 ---
 title: "Statistics for Data Science Homework 2"
 author: " Barba Paolo , Candi Matteo "
-runtime: shiny
+
 output: 
   html_document:
     code_folding: hide
@@ -18,17 +18,18 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-bslib::bs_themer()
 if (requireNamespace("thematic")) 
   thematic::thematic_rmd(font = "auto")
-
 ```
+
+
+
 
 ```{r package}
 library(jpeg)
 library(ppcor)
 library(igraph)
-library(manipulate)
+
 ```
 
 ## Purpose
@@ -38,8 +39,10 @@ The goal of the project is to analyze differences in fMRI (functional magnetic r
 ## Dataset
 
 ```{r dataset}
-load('hw2_data.RData')
-load('coordinates.RData')
+
+load('data/hw2_data.RData')
+load('data/coordinates.RData')
+
 ```
 
 
@@ -85,20 +88,23 @@ For instance we can have a look at the distribution of fMRI at the same cortical
 sub_1 <- td_sel$caltech_0051487$`2001`
 sub_2 <- td_sel$trinity_0050259$`2001`
 par(mfrow = c( 1, 2 ))
-hist(sub_1 , main = "Histogram of fMRI in the 2001 area /n subject 1",
+hist(sub_1 , main = "Histogram of fMRI in the 2001 area \n subject 1",
      col = "#4682b4", border = "white" , freq = T , xlab = "fMRI result"
   
 )
 
 box()
 
-hist(sub_2 , main = "Histogram of fMRI in the 2001 area /n subject 1",
+hist(sub_2 , main = "Histogram of fMRI in the 2001 area \n subject 2",
      col= "#4682b4", border = "white" , freq = T , xlab = "fMRI result"
 )
 
 box()
 
 ```
+
+
+
 
 To remove the subject-specific effect we subtract the 116 time series arithmetic meansand divide by their corresponding across time standard deviations.
 
@@ -116,8 +122,8 @@ scale_datasets_list <- function(ls){
   return(scaled_list)
 }
 
-td_scale  <- scale_datasets_list(td_sel)
-asd_scale <- scale_datasets_list(asd_sel)
+td_sel_scale <- scale_datasets_list(td_sel)
+asd_sel_scale <- scale_datasets_list(asd_sel)
 ```
 
 
@@ -140,6 +146,7 @@ cells_value_array <- function(ls, i, j){
 }
 
 
+#### Choose metric =c('mean', 'median', 'sd')
 summary_dataset <- function(ls, metric='mean'){
   if(metric=='mean'){fun <- mean}
   if(metric=='median'){fun <- median}
@@ -159,26 +166,14 @@ summary_dataset <- function(ls, metric='mean'){
 }
 
 
-TD <- summary_dataset(td_sel_scale, metric= 'median')
+TD <- summary_dataset(td_sel_scale, metric='median')
 ASD <- summary_dataset(asd_sel_scale, metric='median')
+
 
 ```
 
 
 As a consequence of this approach we end up with two $116 \times 116$ matrices,rappresent the correlations between all the cortical region for the two groups.
-
-```{r correlation matrix , }
-# Function that takes as a input a list of matrices and returns  a single matrix by doing element-wise mean
-
-cor_matrix_function <- function(list){
-  cor_matrices <- lapply(list, cor)     # make the correlation matrices
-  Y <- do.call(cbind, cor_matrices)     # put the matrices into a dataset
-  Y <- array(Y, dim=c(dim(cor_matrices[[1]]), length(cor_matrices)))  #
-  mean_cor_matrix <- apply(Y, c(1, 2), mean, na.rm = TRUE)    # compute the mean
-  return(mean_cor_matrix)
-}
-
-```
 
 Correlations might be used to examine the relationship between brain fMRI data. By calculating correlations between these regions, we can determine whether there is a relationship and how strong it is.It is a way of understanding how different regions of the brain are connected and how they influence each other's activity. If two brain regions consistently show strong positive correlations, it means that their activity tends to increase or decrease together, it might suggest that they are strongly connected and influence each other's activity.
 
@@ -203,6 +198,7 @@ hist(cor(ASD) ,
 box()
 
 ```
+
 
 For evaluating dependency between cortical regions we have been used the association graph.
 
@@ -270,41 +266,22 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
   if(bound == 'U'){ return(Upper_bound) }
 }
 
-
 ```
 
 By increasing the value of the threshold t we basically require a strongest correlation between the two regions.
 
-We set the adjacency matrix as a (D x D) matrix where there is 1 if for the pair {j , k} the null hypothesis is rejected and 0 instead.
+We set the adjacency matrix as a (D x D) matrix where there is 1 if for the pair {j , k} the null hypothesis is rejected and 0 otherwise.
 
 
 
 ```{r adjecency matrix }
-adj_matrix_func <- function(list, t, cor_type='normal', bonferroni=TRUE){
-  
-  #### Find lower and upper for each person
-  lowers <- lapply(list, lower_or_upper, 'L', cor_type, bonferroni)
-  uppers <- lapply(list, lower_or_upper, 'U', cor_type, bonferroni)
-  
-  #### Compute mean lower matrix
-  Y <- do.call(cbind, lowers)
-  Y <- array(Y, dim=c(dim(lowers[[1]]), length(lowers)))
-  LOWER <- apply(Y, c(1, 2), mean, na.rm = TRUE)
-  
-  #### Compute mean upper matrix 
-  Y <- do.call(cbind, uppers)
-  Y <- array(Y, dim=c(dim(uppers[[1]]), length(uppers)))
-  UPPER <- apply(Y, c(1, 2), mean, na.rm = TRUE)
-  
-  #### Adjacency Matrix
-  adj_matrix <- as.matrix(UPPER < -t | LOWER > t)
-  
-  #### Rename rows and columns as ROI zones
-  colnames(adj_matrix) <- colnames(list[[1]])
-  rownames(adj_matrix) <- colnames(list[[1]])
-  
-  return(adj_matrix)
+adj_matrix_func <- function(mat , t){
+  L <-  lower_or_upper(mat , "L")
+  U <-  lower_or_upper(mat , "U")
+  adj <- as.matrix(L > t | U < -t)
+  return(adj)
 }
+
 
 ```
 
@@ -316,12 +293,19 @@ The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex-
 After all we can visualize the association graph f0r the two groups slicing the value of threshold t in order to see co-activation differences.
 
 ```{r plot }
-plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2 , threshold ){
+plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2){
   
+  adj_mat_1 <- adj_matrix_func(mat_1, t = t)
+  adj_mat_2 <- adj_matrix_func(mat_2, t = t)
+  
+  #Check if there are edges
+  if(sum(adj_mat_1) == 116 & sum(adj_mat_2)==116){
+    return('There are no edges. Try with lower value of t')
+  }
   
   #### Create Graphs
-  g1 <- graph.adjacency(adj_matrix_func(adj_mat_1 , threshold), mode = "undirected", diag = FALSE )
-  g2 <- graph.adjacency(adj_matrix_func(adj_mat_2 , threshold), mode = "undirected", diag = FALSE )
+  g1 <- graph.adjacency(adj_mat_1, mode = "undirected", diag = FALSE )
+  g2 <- graph.adjacency(adj_mat_2, mode = "undirected", diag = FALSE )
   
   
   #### Set nodes colors based on ROIs
@@ -344,6 +328,9 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2 , threshold ){
     if(edge %in% as_ids(E(g1))){E(g2)[i]$color = 'black'}
     else{E(g2)[i]$color = 'red'} }
   
+  
+  #### Import ROI coordinates
+  load('data/coordinates.RData')
   coord <- aal116coordinates
   
   if(dimensions == 2){
@@ -351,12 +338,12 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2 , threshold ){
     par(mfrow=c(1,2))
     layout <- matrix(c(coord$x.mni, coord$y.mni), 116,2)
     
-    my_image <- readJPEG("brain.jpg")
+    my_image <- readJPEG("images/brain.jpg")
     
     for(graph in list(g1,g2)){
       
-      if(identical_graphs(graph, g1)){main = paste0("Brain's ROI correlation\n of TD patients (t=", threshold, ')')}
-      if(identical_graphs(graph, g2)){main = paste0("Brain's ROI correlation\n of ASD patients (t=", threshold, ')')}
+      if(identical_graphs(graph, g1)){main = paste0("Brain's ROI correlation\n of TD patients (t=", t, ')')}
+      if(identical_graphs(graph, g2)){main = paste0("Brain's ROI correlation\n of ASD patients (t=", t, ')')}
       
       plot(0,0, type='n', xlim=c(-1.2, 1.2), ylim=c(-1.2, 1.2), axes=F, main=main, xlab='', ylab='')
       
@@ -378,9 +365,14 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2 , threshold ){
               layout=layout, main=main) }}
 }
 
-plot_graphs(td_sel, asd_sel ,dimensions=2 , threshold = .4)
+
+plot_graphs(TD, ASD ,t = .3 , dimensions=2)
+
 
 ```
+
+
+
 
 
 
