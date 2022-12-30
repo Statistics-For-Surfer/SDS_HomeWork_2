@@ -20,7 +20,23 @@ corrplot(data_cor, method='color', tl.pos='n', order="hclust")
 
 
 
-rm(list=ls())
+# DATA CLEANING -----------------------------------------------------------
+
+#### Scaling by column.
+scale_datasets_list <- function(ls){
+  scaled_list <- list()
+  names <- names(ls)
+  for(i in 1:length(ls)){
+    patient <- data.frame(apply(ls[[i]], 2, scale))
+    scaled_list[[names[i]]] <-patient
+  }
+  return(scaled_list)
+}
+
+td_sel_scale <- scale_datasets_list(td_sel)
+asd_sel_scale <- scale_datasets_list(asd_sel)
+
+
 
 
 # PACKAGES ----------------------------------------------------------------
