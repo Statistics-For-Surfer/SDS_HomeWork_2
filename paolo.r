@@ -211,7 +211,5 @@ plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2){
 }
 
 
-
-
 plot_graphs(TD, ASD ,t = .6 , dimensions=2)
 
