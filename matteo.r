@@ -20,23 +20,24 @@ corrplot(data_cor, method='color', tl.pos='n', order="hclust")
 
 
 
-# DATA CLEANING -----------------------------------------------------------
-
-#### Scaling by column.
-scale_datasets_list <- function(ls){
-  scaled_list <- list()
-  names <- names(ls)
-  for(i in 1:length(ls)){
-    patient <- data.frame(apply(ls[[i]], 2, scale))
-    scaled_list[[names[i]]] <-patient
-  }
-  return(scaled_list)
-}
-
-td_sel_scale <- scale_datasets_list(td_sel)
-asd_sel_scale <- scale_datasets_list(asd_sel)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rm(list=ls())
 
 
 # PACKAGES ----------------------------------------------------------------
@@ -47,9 +48,67 @@ library(igraph)
 
 
 
-# DATA --------------------------------------------------------------------
+# LOAD DATA ---------------------------------------------------------------
 
 load('data/hw2_data.RData')
+
+
+
+# DATA CLEANING -----------------------------------------------------------
+
+scale_datasets_list <- function(ls){
+  scaled_list <- list()
+  names <- names(ls)
+  for(i in 1:length(ls)){
+    
+    #### Scaling by column.
+    patient <- data.frame(apply(ls[[i]], 2, scale))
+    colnames(patient) <- colnames(ls[[i]])
+    scaled_list[[names[i]]] <-patient
+  }
+  return(scaled_list)
+}
+
+td_sel_scale <- scale_datasets_list(td_sel)
+asd_sel_scale <- scale_datasets_list(asd_sel)
+
+
+
+# POOL DATASET ------------------------------------------------------------
+
+#### Mean by cell given list of datasets
+cells_value_array <- function(ls, i, j){
+  cells_value <- c()
+  for(patient in ls){
+    cells_value <- c(cells_value, patient[i,j])
+  }
+  return(cells_value)
+}
+
+
+#### Choose metric =c('mean', 'median', 'sd')
+summary_dataset <- function(ls, metric='mean'){
+  if(metric=='mean'){fun <- mean}
+  if(metric=='median'){fun <- median}
+  if(metric=='sd'){fun <- sd}
+  
+  n <- nrow(ls[[1]])
+  m <- ncol(ls[[1]])
+  mean_data <- matrix(rep(NA,n*m), n, m)
+  for(i in 1:n){
+    for(j in 1:m){
+      mean_data[i,j] <- fun(cells_value_array(ls, i, j))
+    }
+  }
+  data_frame <-data.frame(mean_data)
+  colnames(data_frame) <- colnames(ls[[1]])
+  return(data_frame)
+}
+
+
+TD <- summary_dataset(td_sel_scale, metric='mean')
+ASD <- summary_dataset(asd_sel_scale, metric='mean')
+
 
 
 
@@ -136,14 +195,14 @@ cor_matrix_function <- function(list){
 
 t <- 0.4
 
-td_adj_normal_cor <- adj_matrix_func(td_sel, t, bonferroni=T)
-asd_adj_normal_cor <- adj_matrix_func(asd_sel, t, bonferroni=T)
+td_adj_normal_cor <- adj_matrix_func(td_sel_scale, t, bonferroni=T)
+asd_adj_normal_cor <- adj_matrix_func(asd_sel_scale, t, bonferroni=T)
 
-td_adj_td_partial_cor <- adj_matrix_func(td_sel, t, 'partial')
-asd_adj_partial_cor <- adj_matrix_func(asd_sel, t, 'partial')
+td_adj_td_partial_cor <- adj_matrix_func(td_sel_scale, t, 'partial')
+asd_adj_partial_cor <- adj_matrix_func(asd_sel_scale, t, 'partial')
 
-td_cor_matrix <- cor_matrix_function(td_sel)
-asd_cor_matrix <- cor_matrix_function(asd_sel)
+td_cor_matrix <- cor_matrix_function(td_sel_scale)
+asd_cor_matrix <- cor_matrix_function(asd_sel_scale)
 
 
 
