@@ -2,8 +2,11 @@ rm(list=ls())
 ??read_html
 # Importing data.
 load('data/hw2_data.RData')
+load(""
+
+
 # PACKAGES ----------------------------------------------------------------
-??saveHTML
+
 library(jpeg)
 library(ppcor)
 library(igraph)
@@ -61,8 +64,8 @@ summary_dataset <- function(ls, metric='mean'){
 }
 
 
-TD <- summary_dataset(td_sel_scale, metric='mean')
-ASD <- summary_dataset(asd_sel_scale, metric='mean')
+TD <- summary_dataset(td_sel_scale, metric='median')
+ASD <- summary_dataset(asd_sel_scale, metric='median')
 
 
 
@@ -107,6 +110,8 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
   if(bound == 'L'){ return(Lower_bound) }
   if(bound == 'U'){ return(Upper_bound) }
 }
+
+
 
 
 
@@ -212,7 +217,7 @@ plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2){
 }
 
 
-plot_graphs(TD, ASD ,t = .6 , dimensions=2)
+plot_graphs(TD, ASD ,t = .2 , dimensions=2 )
 
 plot_frame <- function(i) {
   plot_graphs(TD, ASD ,t = i , dimensions=2)

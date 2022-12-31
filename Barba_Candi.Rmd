@@ -26,9 +26,11 @@ if (requireNamespace("thematic"))
 
 
 ```{r package}
-library(jpeg)
-library(ppcor)
-library(igraph)
+
+suppressMessages(library(jpeg))
+suppressMessages(library(ppcor))
+suppressMessages(library(igraph))
+
 
 ```
 
@@ -83,7 +85,7 @@ Since data were taken in different labs, it's worth to remove to see and to remo
 For instance we can have a look at the distribution of fMRI at the same cortical region for two difference subject in the same group but taken in different laboratory.
 
 
-```{r data - preproocessing 1  }
+```{r data - preproocessing 1 , warning = FALSE}
 
 sub_1 <- td_sel$caltech_0051487$`2001`
 sub_2 <- td_sel$trinity_0050259$`2001`
@@ -179,7 +181,7 @@ Correlations might be used to examine the relationship between brain fMRI data. 
 
 First we can have a look at the empirical distribution of the Pearson correlation coefficients within the groups.The distribution of correlations can provide insights into brain function and can be helpful to understand how different brain regions contribute to various cognitive processes.
 
-```{r histograms correlations coefficient }
+```{r histograms correlations coefficient, warning = FALSE}
 
 par(mfrow = c( 1 ,2 ))
 
@@ -198,6 +200,8 @@ hist(cor(ASD) ,
 box()
 
 ```
+
+
 
 
 For evaluating dependency between cortical regions we have been used the association graph.
@@ -292,7 +296,7 @@ The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex-
 
 After all we can visualize the association graph f0r the two groups slicing the value of threshold t in order to see co-activation differences.
 
-```{r plot }
+```{r plot , warning = FALSE }
 plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2){
   
   adj_mat_1 <- adj_matrix_func(mat_1, t = t)
