@@ -247,7 +247,6 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
   #### Bonferroni Correction
   if(bonferroni == TRUE){ alpha <- alpha / m }
   
-  
   #### Use "Correlation" or "Partial Correlation"
   if(cor_type == 'normal'){
     g <- 0
@@ -285,9 +284,9 @@ We set the adjacency matrix as a (D x D) matrix where there is 1 if for the pair
 
 
 ```{r adjecency matrix }
-adj_matrix_func <- function(mat , t , bonf = TRUE){
-  L <-  lower_or_upper(mat , "L", bonferroni = bonf)
-  U <-  lower_or_upper(mat , "U", bonferroni = bonf )
+adj_matrix_func <- function(mat , t){
+  L <-  lower_or_upper(mat , "L")
+  U <-  lower_or_upper(mat , "U")
   adj <- as.matrix(L > t | U < -t)
   return(adj)
 }
@@ -301,10 +300,10 @@ The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex-
 After all we can visualize the association graph f0r the two groups slicing the value of threshold t in order to see co-activation differences.
 
 ```{r plot , warning = FALSE }
-plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2 , bonferroni = TRUE){
+plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2){
   
-  adj_mat_1 <- adj_matrix_func(mat_1, t = t, bonferroni)
-  adj_mat_2 <- adj_matrix_func(mat_2, t = t, bonferroni)
+  adj_mat_1 <- adj_matrix_func(mat_1, t = t)
+  adj_mat_2 <- adj_matrix_func(mat_2, t = t)
   
   #Check if there are edges
   if(sum(adj_mat_1) == 116 & sum(adj_mat_2)==116){
@@ -370,19 +369,18 @@ plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2 , bonferroni = TRUE){
       rglplot(graph,
               vertex.size=7, vertex.label.cex=.5, vertex.color=V(graph)$color,
               edge.width=4, edge.color=E(graph)$color,
-              layout=layout, main= "ciao3d") }}
+              layout=layout, main=main) }}
 }
 
 
+plot_graphs(TD, ASD ,t = .3 , dimensions=2)
 
-plot_graphs(TD, ASD ,t = .3 , dimensions=3)
-
-#plot_graphs(TD, ASD , t = .3 , dimensions = 2 , bonferroni = FALSE)
 
 ```
 
-
-
+<div align="center">
+  <img src="images/brain_graph_normal_corr_bonf.gif" width="650" height="400" class="center"/>
+</div>
 
 
 
