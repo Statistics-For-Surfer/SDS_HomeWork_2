@@ -381,8 +381,9 @@ plot_graphs(TD, ASD ,t = .3 , dimensions=3)
 
 ```
 
-
-
+<div align="center">
+  <img src="images/brain_graph_normal_corr_bonf.gif" width="650" height="400" class="center"/>
+</div>
 
 
 
