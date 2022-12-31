@@ -22,9 +22,6 @@ if (requireNamespace("thematic"))
   thematic::thematic_rmd(font = "auto")
 ```
 
-
-
-
 ```{r package}
 
 suppressMessages(library(jpeg))
@@ -47,8 +44,6 @@ load('data/coordinates.RData')
 
 ```
 
-
-
 The dataset we used for the sake of this project is ABIDE (Autism Brain Imaging Data Exchange); collection of brain imaging data and clinical information from individuals with autism spectrum disorder (ASD) and typically developing (TD) controls.
 
 The dataset consists of a of structural and functional MRI data from over 12 individuals with ASD and 12 TD controls.
@@ -56,7 +51,6 @@ The dataset consists of a of structural and functional MRI data from over 12 ind
 For each subject we have $n =145$ fMRI results for each of the $D = 116$ cortical regions.
 
 Brief explanation (Without being an expert) in what ABIDE dataset contains:
-
 
 -   fMRI measures brain activity by detecting changes in blood flow.
 
@@ -80,11 +74,9 @@ The eight cortical regions in the ABIDE dataset are:
 
 [TODO] color the names of the regions based on the names in the brain network image [TODO] insert the reference
 
-## Pre-processed 
+## Pre-processed
 
-Since data were taken in different labs, it's worth to remove to see and to remove the lab-specific effect.
-For instance we can have a look at the distribution of fMRI at the same cortical region for two difference subject in the same group but taken in different laboratory.
-
+Since data were taken in different labs, it's worth to remove to see and to remove the lab-specific effect. For instance we can have a look at the distribution of fMRI at the same cortical region for two difference subject in the same group but taken in different laboratory.
 
 ```{r data - preproocessing 1 , warning = FALSE}
 
@@ -106,9 +98,6 @@ box()
 
 ```
 
-
-
-
 To remove the subject-specific effect we subtract the 116 time series arithmetic meansand divide by their corresponding across time standard deviations.
 
 ```{r data - preproocessing 2  }
@@ -129,12 +118,9 @@ td_sel_scale <- scale_datasets_list(td_sel)
 asd_sel_scale <- scale_datasets_list(asd_sel)
 ```
 
-
 ## Pool Together
 
-To achieve the goal of enhance the separation between ASD and TD subjects,
-we pool the data within each group, by taking a statistical summary  across subject on a per-time and per ROI data.
-To be more robust on the analysis we take the median as the statisical summary.
+To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data. To be more robust on the analysis we take the median as the statisical summary.
 
 We assumed within group double independence (across time and subjects), we will not consider the time dependency and so we treat the data as $i.i.d.$.
 
@@ -175,7 +161,6 @@ ASD <- summary_dataset(asd_sel_scale, metric='median')
 
 ```
 
-
 As a consequence of this approach we end up with two $116 \times 116$ matrices,rappresent the correlations between all the cortical region for the two groups.
 
 Correlations might be used to examine the relationship between brain fMRI data. By calculating correlations between these regions, we can determine whether there is a relationship and how strong it is.It is a way of understanding how different regions of the brain are connected and how they influence each other's activity. If two brain regions consistently show strong positive correlations, it means that their activity tends to increase or decrease together, it might suggest that they are strongly connected and influence each other's activity.
@@ -201,9 +186,6 @@ hist(cor(ASD) ,
 box()
 
 ```
-
-
-
 
 For evaluating dependency between cortical regions we have been used the association graph.
 
@@ -231,9 +213,7 @@ Once converted the correlations coefficients to z-scores, we can use the normal 
 
 Since we are dealing with family wise test, in order to control the probability of making at least one error we can adjust the $\alpha$ confidence level by using Bonferroni Correction. The confidence level would be divided by the number of correlations coefficient we are testing $\binom{D}{2} = \frac{116 \times 115}{2} = 6.670$.
 
-The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. 
-Since $\alpha_{b} = \frac{\alpha}{m} = \frac{.05}{6670} = 0,00075 $ the confidence intervals results wider, more often intersecting the interval $(-t, t)$ .
-It results on the conclusion of don't put edges between cortical regions where it should be.
+The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. Since \$\alpha\_{b} = \frac{\alpha}{m} = \frac{.05}{6670} = 0,00075 \$ the confidence intervals results wider, more often intersecting the interval $(-t, t)$ . It results on the conclusion of don't put edges between cortical regions where it should be.
 
 ```{r Confidence intervals }
 lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
@@ -282,8 +262,6 @@ By increasing the value of the threshold t we basically require a strongest corr
 
 We set the adjacency matrix as a (D x D) matrix where there is 1 if for the pair {j , k} the null hypothesis is rejected and 0 otherwise.
 
-
-
 ```{r adjecency matrix }
 adj_matrix_func <- function(mat , t , bonf = TRUE){
   L <-  lower_or_upper(mat , "L", bonferroni = bonf)
@@ -292,9 +270,6 @@ adj_matrix_func <- function(mat , t , bonf = TRUE){
   return(adj)
 }
 ```
-
-
-
 
 The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex--set and E the edge--set.The edge--set E is as a (D × D) adjacency matrix E where E(j, k) = 1 if there is an edge between regions j and regions k and 0 otherwise.
 
@@ -381,17 +356,54 @@ plot_graphs(TD, ASD ,t = .3 , dimensions=3)
 
 ```
 
-<div align="center">
-  <img src="images/brain_graph_normal_corr_bonf.gif" width="650" height="400" class="center"/>
-</div>
+::: {align="center"}
+<img src="images/brain_graph_normal_corr_bonf.gif" class="center" width="650" height="400"/>
+:::
 
+### Explanation of the plots
 
+The plots rappresents the two graphs one for each group where:
 
+-   each node rapprsents a cortical region of the brain, the color of the nodes identify one of the eight main areas (previously explained ) it belongs.
 
+-   each edge rappresents a strongest than the setted threshold t linear correlation between the two ares, the color of the edge has the following meaning:
 
+    black: if both the two graph have the edge in common.
 
+    blue: if only the TD graph has the edge.
 
+    red: if only the ASD graph has the edge.
 
+## Statistical properties:
 
+All the plots are built using the Person's correlation coefficient as the association measure.
 
+The first pair of plots are built according to the Bonferroni family-wise adjustment while the second one are built skipping the connection. As we could expect the unadjusted one ( since the test is based on wiser confidence intervals ) has definetely more edges than the other.
 
+## Analysis
+
+Following the result of what happens varying the threshold t from small to large value of \$\\alpha\$:
+
+-   edges between cortical regions in font color= "#CB3234"> Occipital lobe </font> are the most resilient in both the two graphs. It suggests that there are no statistical difference in order to highlight problems riguardanti visual perception between ASD and TD subjects.
+
+-   edges between cortical regions in <font color="#7fffd4"> Temporal lobe </font> are resilient in both the two groups. It suggest that there are no statistical difference in order to highlight problems riguardanti visual memory, language comprehension, and emotion association that can be caused by authism.
+
+-   edges between cortical regions in <font color="#77DD77"> Frontal lobe</font> are more resilient for the TD graph than the ASD one. It suggest that there are statistical difference between groups in this specif area that can be sintomo di disturbi riguardanti problem solving and other stuff. [TODO] chedere ad annaclara quali sono i disturbi in problem solving degli autistici.
+
+[TODO] Continue the analysis because i don't want to do it now, i just want to celebrete the new year!!!!
+
+## Analysis using partial correlation
+
+Partial correlation is a measure of the linear association between two variables while controlling for the effects of one or more others.
+
+Partial correlation is a measure of the strength and direction of the relationship between two variables, taking into account the effects of one or more other variables. It is useful for understanding the relationship between two variables when there are other variables that might be influencing that relationship.
+
+[TODO] Highlight differences in confidence intervals between the two association measure.
+												
+
+					
+				
+			
+		
+
+	
