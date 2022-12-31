@@ -195,7 +195,7 @@ cor_matrix_function <- function(list){
 
 # MATRICES ----------------------------------------------------------------
 
-t <- 0.4
+t <- 0.7
 
 td_adj_normal_cor <- adj_matrix_func(td_sel_scale, t, bonferroni=T)
 asd_adj_normal_cor <- adj_matrix_func(asd_sel_scale, t, bonferroni=T)
@@ -253,7 +253,7 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2){
     layout <- matrix(c(coord$x.mni, coord$y.mni), 116,2)
     
     my_image <- readJPEG("images/brain.jpg")
-    
+    main='3D brain'
     for(graph in list(g1,g2)){
       
       if(identical_graphs(graph, g1)){main = paste0("Brain's ROI correlation\n of TD patients (t=", t, ')')}
@@ -276,9 +276,10 @@ plot_graphs <- function(adj_mat_1, adj_mat_2,dimensions=2){
       rglplot(graph,
               vertex.size=7, vertex.label.cex=.5, vertex.color=V(graph)$color,
               edge.width=4, edge.color=E(graph)$color,
-              layout=layout, main=main) }}
+              layout=layout) }}
 }
 
 
 plot_graphs(td_adj_normal_cor, asd_adj_normal_cor,dimensions=2)
+
 
