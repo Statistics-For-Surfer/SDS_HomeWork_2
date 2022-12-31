@@ -57,25 +57,26 @@ For each subject we have $n =145$ fMRI results for each of the $D = 116$ cortica
 
 Brief explanation (Without being an expert) in what ABIDE dataset contains:
 
+
 -   fMRI measures brain activity by detecting changes in blood flow.
 
 The eight cortical regions in the ABIDE dataset are:
 
--   <font color="red">Prefrontal cortex</font>: is involved in decision-making, planning, and problem-solving.
+-   <font color="#77DD77"> Frontal lobe</font>: is involved in decision-making, planning, and problem-solving.
 
--   <font color="yellow">Anterior cingulate cortex</font>: is involved in attention, motivation, and emotion.
+-   <font color="#C8A2C8"> Insula lobe </font>: is involved sensory experience and emotional valence.
 
--   <font color="blue">Posterior cingulate cortex</font>:is involved in spatial awareness and memory.
+-   <font color="#FFFF66"> Limbic system </font>: is involved in behavioural and emotional responses.
 
--   <font color="green">Temporal lobe</font>: is involved in hearing, language, and memory.
+-   <font color= "#CB3234"> Occipital lobe </font>: is involved visual perception, including colour, form and motion.
 
--   <font color="pink">Occipital lobe</font>: is responsible for vision.
+-   <font color="#E1E1E2"> Parietal lobe </font>: is responsible of sensory perception and integration, like: taste, hearing, sight, touch, and smell.
 
--   <font color="cyan4">Insula </font>: is involved in interoception (awareness of the body's internal state) and emotion.
+-   <font color="#ff8c69"> SCGM </font>: is involved in process information.
 
--   <font color="bisque"> Amygdala</font>:is involved in emotion and memory.
+-   <font color="#7fffd4"> Temporal lobe </font>:is involved in retention of visual memory, language comprehension, and emotion association.
 
--   <font color="purple"> Hippocampus </font>: is involved in memory and spatial navigation.
+-   <font color="#ABCDEF"> Cerebellum </font>: is involved for muscle control, including balance and movement..
 
 [TODO] color the names of the regions based on the names in the brain network image [TODO] insert the reference
 
@@ -216,6 +217,8 @@ For each pair {j,k} of cortical regions we tested at confidence level setted to 
 ```
 To test so, we compute for each pair {j,k} the confidence intervals, rejecting the null Hypothesis if the intervals does not intersect with the value 0.
 
+Generically, having a threshold t , we can require a as we like strong correlation between the ares.
+
 ### Process to compute the Confidence intervals
 
 To compute confidence intervals for a family of correlation coefficients, we used the Fisher's Z transformation. This method involves converting the correlation coefficients to a new scale called z-scores.
@@ -228,7 +231,9 @@ Once converted the correlations coefficients to z-scores, we can use the normal 
 
 Since we are dealing with family wise test, in order to control the probability of making at least one error we can adjust the $\alpha$ confidence level by using Bonferroni Correction. The confidence level would be divided by the number of correlations coefficient we are testing $\binom{D}{2} = \frac{116 \times 115}{2} = 6.670$.
 
-The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. It result on the conclusion of putting edges between cortical regions where it should not be.
+The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. 
+Since $\alpha_{b} = \frac{\alpha}{m} = \frac{.05}{6670} = 0,00075 $ the confidence intervals results wider, more often intersecting the interval $(-t, t)$ .
+It results on the conclusion of don't put edges between cortical regions where it should be.
 
 ```{r Confidence intervals }
 lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
@@ -285,8 +290,6 @@ adj_matrix_func <- function(mat , t){
   adj <- as.matrix(L > t | U < -t)
   return(adj)
 }
-
-
 ```
 
 
@@ -313,7 +316,7 @@ plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2){
   
   
   #### Set nodes colors based on ROIs
-  colors <- c('aquamarine', 'chartreuse', 'darkorchid1', 'gold', 'lightpink1', 'orangered', 'salmon', 'seashell2', 'skyblue2')
+  colors <- c('0','#77DD77', '#C8A2C8', '#FFFF66', '#CB3234', '#E1E1E2', '#ff8c69', '#7fffd4', '#ABCDEF')
   
   for(i in 1:length(V(g1)$name)){
     V(g1)$color[i] <- colors[strtoi(substr(V(g1)$name[i],1,1))]
