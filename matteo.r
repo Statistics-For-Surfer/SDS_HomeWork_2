@@ -311,7 +311,6 @@ library(jpeg)
 library(ppcor)
 library(igraph)
 library(htmlwidgets)
-library(animation)
 
 
 
@@ -421,9 +420,9 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
 }
 
 
-adj_matrix_func <- function(mat , t){
-  L <-  lower_or_upper(mat , "L")
-  U <-  lower_or_upper(mat , "U")
+adj_matrix_func <- function(mat , t, bonf=T){
+  L <-  lower_or_upper(mat , "L", bonferroni=bonf)
+  U <-  lower_or_upper(mat , "U", bonferroni= bonf)
   adj <- as.matrix(L > t | U < -t)
   return(adj)
 }
@@ -431,10 +430,10 @@ adj_matrix_func <- function(mat , t){
 
 
 
-plot_graphs <- function(mat_1, mat_2, t, dimensions=2){
+plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE){
   
-  adj_mat_1 <- adj_matrix_func(mat_1, t = t)
-  adj_mat_2 <- adj_matrix_func(mat_2, t = t)
+  adj_mat_1 <- adj_matrix_func(mat_1, t = t, bonf=bonf)
+  adj_mat_2 <- adj_matrix_func(mat_2, t = t, bonf=bonf)
   
   #Check if there are edges
   if(sum(adj_mat_1) == 116 & sum(adj_mat_2)==116){
@@ -504,26 +503,15 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2){
 }
 
 
-plot_graphs(TD, ASD ,t = .3 , dimensions=2)
+plot_graphs(TD, ASD ,t = .3 , dimensions=2, bonf=F)
 
 
 
 
 
 
+# GIFs --------------------------------------------------------------------
 
-
-
-
-grid <- seq(0, 0.6, by=.05)
-
-for(t in grid){
-  path <- paste0("images/gif/t=0_",t*100,".jpg")
-  if(t == .05){path <-  paste0("images/gif/t=0_0",t*100,".jpg")}
-  jpeg(file=path, width = 900, height = 560)
-  plot_graphs(TD, ASD ,t = t , dimensions=2)
-  dev.off()
-}
 
 
 
@@ -532,7 +520,23 @@ library(dplyr)
 library(tidyr)
 
 
-imgs <- list.files("images/gif/", full.names = TRUE)
+
+
+
+#### WITH BONF ADJ
+grid <- seq(0, 0.6, by=.05)
+
+for(t in grid){
+  path <- paste0("images/gif_normal_cor_bonf/t=0_",t*100,".jpg")
+  if(t == .05){path <-  paste0("images/gif_normal_cor_bonf/t=0_0",t*100,".jpg")}
+  jpeg(file=path, width = 900, height = 560)
+  plot_graphs(TD, ASD ,t = t , dimensions=2)
+  dev.off()
+}
+
+
+
+imgs <- list.files("images/gif_normal_cor_bonf/", full.names = TRUE)
 img_list <- lapply(imgs, image_read)
 
 
@@ -550,7 +554,41 @@ image_write(image = img_animated,
 
 
 
-image_background(frink, "hotpink")
+
+
+
+
+
+### WITHOUT BONF ADJ
+
+grid <- seq(0, 0.6, by=.05)
+
+for(t in grid){
+  path <- paste0("images/gif_normal_cor_no_bonf/t=0_",t*100,".jpg")
+  if(t == .05){path <-  paste0("images/gif_normal_cor_no_bonf/t=0_0",t*100,".jpg")}
+  jpeg(file=path, width = 900, height = 560)
+  plot_graphs(TD, ASD ,t = t , dimensions=2, bonf=F)
+  dev.off()
+}
+
+
+
+imgs <- list.files("images/gif_normal_cor_no_bonf/", full.names = TRUE)
+img_list <- lapply(imgs, image_read)
+
+
+## join the images together
+img_joined <- image_join(img_list)
+
+## animate at 2 frames per second
+img_animated <- image_animate(img_joined, fps = 1)
+
+## view animated image
+img_animated
+
+image_write(image = img_animated,
+            path = "images/brain_graph_normal_corr_no_bonf.gif")
+
 
 
 
