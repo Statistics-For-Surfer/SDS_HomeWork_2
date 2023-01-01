@@ -2,7 +2,7 @@ rm(list=ls())
 ??read_html
 # Importing data.
 load('data/hw2_data.RData')
-load(""
+
 
 
 # PACKAGES ----------------------------------------------------------------
@@ -228,11 +228,40 @@ ani.options(interval = 0.5, nmax = 50, loop = TRUE)
 th <- seq(from = 0 , to = .5 , by = .1)
 
 
-saveHTML({
-  for (i in th) {
-    plot_frame(i)
-  }
-}, file = "myanimation.html")
+par(mfrow= c( 1, 1))
+
+Ls <- sort(lower_or_upper(TD , "L"))
+xs <- seq(from = 0 , to = length(Ls) , by = 1)
+Us <- sort(lower_or_upper(TD , "U") )
+Ls_n <-sort(lower_or_upper(TD , "L" , bonferroni = F))  
+US_n <- sort(lower_or_upper(TD , "U" , bonferroni = F))  
+
+plot(Ls, col = "white" , main = "Asyntotic confidence intervals of rho \n 
+     with bonferroni  adjustment and without ", 
+     xlab = "" , ylab = "Lower and Upper Bound")
+points(Us, , col = "white")
+segments(x0 = xs , y0 = Ls , x1 = xs , y1 = Us, , col = "lightblue")
+segments(x0 = xs , y0 = Ls_n , x1 = xs , y1 = US_n, , col = "#FFFF66")
+grid()
+points(sort(cor(TD)), col = "#CB3234", cex =  .3)
+legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2,  border = "white")
+
+
+Ls <- sort(lower_or_upper(ASD , "L"))
+xs <- seq(from = 0 , to = length(Ls) , by = 1)
+Us <- sort(lower_or_upper(ASD , "U") )
+Ls_n <-sort(lower_or_upper(ASD, "L" , bonferroni = F))  
+US_n <- sort(lower_or_upper(ASD , "U" , bonferroni = F))  
+
+plot(Ls, col = "white" , main = "Asyntotic confidence intervals of rho \n 
+     with bonferroni  adjustment and without ASD", 
+     xlab = "" , ylab = "Lower and Upper Bound")
+points(Us, , col = "white")
+segments(x0 = xs , y0 = Ls , x1 = xs , y1 = Us, , col = "lightblue")
+segments(x0 = xs , y0 = Ls_n , x1 = xs , y1 = US_n, , col = "#FFFF66")
+grid()
+points(sort(cor(TD)), col = "#CB3234", cex =  .3)
+legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2,  border = "white")
 
 
 

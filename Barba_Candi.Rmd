@@ -350,7 +350,7 @@ plot_graphs <- function(mat_1 , mat_2 ,t, dimensions=2 , bonferroni = TRUE){
 
 
 
-plot_graphs(TD, ASD ,t = .3 , dimensions=3)
+plot_graphs(TD, ASD ,t = .3 , dimensions=2)
 
 #plot_graphs(TD, ASD , t = .3 , dimensions = 2 , bonferroni = FALSE)
 
@@ -379,6 +379,31 @@ The plots rappresents the two graphs one for each group where:
 All the plots are built using the Person's correlation coefficient as the association measure.
 
 The first pair of plots are built according to the Bonferroni family-wise adjustment while the second one are built skipping the connection. As we could expect the unadjusted one ( since the test is based on wiser confidence intervals ) has definetely more edges than the other.
+
+```{r CIS PLOTS ,  warning = FALSE}
+
+Ls <- sort(lower_or_upper(TD , "L"))
+xs <- seq(from = 0 , to = length(Ls) , by = 1)
+Us <- sort(lower_or_upper(TD , "U") )
+Ls_n <-sort(lower_or_upper(TD , "L" , bonferroni = F))  
+US_n <- sort(lower_or_upper(TD , "U" , bonferroni = F))  
+
+
+
+plot(Ls, col = "white" , main = "Asyntotic confidence intervals of rho \n 
+     with bonferroni  adjustment and without", 
+     xlab = "" , ylab = "Lower and Upper Bound")
+points(Us, , col = "white")
+segments(x0 = xs , y0 = Ls , x1 = xs , y1 = Us, , col = "lightblue")
+segments(x0 = xs , y0 = Ls_n , x1 = xs , y1 = US_n, , col = "#FFFF66")
+grid()
+points(sort(cor(TD)), col = "#CB3234", cex =  .3)
+legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2 , bty = "n" )
+
+
+```
+
+
 
 ## Analysis
 
