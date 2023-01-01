@@ -409,13 +409,18 @@ legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correcti
 
 Following the result of what happens varying the threshold t from small to large value of \$\\alpha\$:
 
--   edges between cortical regions in font color= "#CB3234"> Occipital lobe </font> are the most resilient in both the two graphs. It suggests that there are no statistical difference in order to highlight problems riguardanti visual perception between ASD and TD subjects.
+-   edges between cortical regions in <font color= "#CB3234"> Occipital lobe </font> are the most resilient in both the two graphs. It suggests that there are no statistical difference in order to highlight problems riguardanti visual perception between ASD and TD subjects.
 
 -   edges between cortical regions in <font color="#7fffd4"> Temporal lobe </font> are resilient in both the two groups. It suggest that there are no statistical difference in order to highlight problems riguardanti visual memory, language comprehension, and emotion association that can be caused by authism.
 
--   edges between cortical regions in <font color="#77DD77"> Frontal lobe</font> are more resilient for the TD graph than the ASD one. It suggest that there are statistical difference between groups in this specif area that can be sintomo di disturbi riguardanti problem solving and other stuff. [TODO] chedere ad annaclara quali sono i disturbi in problem solving degli autistici.
+-   edges between cortical regions in <font color="#77DD77"> Frontal lobe</font> are more resilient for the TD graph than the ASD one. It suggest that there are statistical difference between groups in this specif area that can be sintomo di disturbi riguardanti problem solving and and executive functions.
 
-[TODO] Continue the analysis because i don't want to do it now, i just want to celebrete the new year!!!!
+Besides a lot of connection are effectively between areas corresponding to different regions.
+Generically differences between two groups are in the structure of the connections, ,meaning that there is no a specific brain problem that is associated with autism. The main result is the differences in the association struuture of a certain region as the Frontal lobe, which is involved in problem solving and social processing.
+However,the brain changes associated with autism can vary from people and a sample of twelve people per group may not catch all the actual differences that exist.
+The aim of the study is to suggest possible specific problem releated with autism, to do more focus research to fully understand the underlying brain abnormalities in this disorder.
+
+
 
 ## Analysis using partial correlation
 
