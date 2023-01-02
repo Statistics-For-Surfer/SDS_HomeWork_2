@@ -248,20 +248,43 @@ points(sort(cor(TD)), col = "#CB3234", cex =  .3)
 legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2,  border = "white")
 
 
-Ls <- sort(lower_or_upper(ASD , "L"))
-xs <- seq(from = 0 , to = length(Ls) , by = 1)
-Us <- sort(lower_or_upper(ASD , "U") )
+Ls_bon <- sort(lower_or_upper(ASD , "L"))
+Us_bon <- sort(lower_or_upper(ASD , "U"))
 Ls_n <-sort(lower_or_upper(ASD, "L" , bonferroni = F))  
 US_n <- sort(lower_or_upper(ASD , "U" , bonferroni = F))  
+rhos <- sort(cor(ASD))
+rhos <- rhos[rhos != 1]
+rhos <- unique(rhos)
+
+
+
+
+Ls_n <- Ls_n[Ls_n != 1]
+Ls_n <- unique(Ls_n)
+US_n <- US_n[US_n]
+US_n <- unique(US_n)
+Ls_bon <- Ls_bon[Ls_bon != 1]
+Ls_bon <- unique(Ls_bon)
+Us_bon <- Us_bon[Us_bon != 1]
+Us_bon <- unique(Us_bon)
+
+
+
+xs <- seq(from = 0 , to = length(Ls) , by = 1)
+
+
+
+
 
 plot(Ls, col = "white" , main = "Asyntotic confidence intervals of rho \n 
      with bonferroni  adjustment and without ASD", 
-     xlab = "" , ylab = "Lower and Upper Bound")
+     xlab = "" , ylab = "Lower and Upper Bound" , ylim = c(-1,1))
 points(Us, , col = "white")
-segments(x0 = xs , y0 = Ls , x1 = xs , y1 = Us, , col = "lightblue")
+
+segments(x0 = xs , y0 = Ls_bon , x1 = xs , y1 = Us_bon, , col = "lightblue")
 segments(x0 = xs , y0 = Ls_n , x1 = xs , y1 = US_n, , col = "#FFFF66")
 grid()
-points(sort(cor(TD)), col = "#CB3234", cex =  .3)
+points(rhos, col = "#CB3234", cex =  .3)
 legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2,  border = "white")
 
 
