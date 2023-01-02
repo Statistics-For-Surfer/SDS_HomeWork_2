@@ -116,8 +116,7 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
     corr_matrix <- cor(data) }
   if(cor_type == 'partial'){
     g <- D-2
-    corr_matrix <- pcor(data)
-    corr_matrix <- corr_matrix$estimate}
+    corr_matrix <- pcor(data)$estimate}
   
   #### Computing Fisher Z-Transform
   Z_j_k_td <- (1/2)*log((1+corr_matrix)/(1-corr_matrix))
@@ -148,10 +147,7 @@ adj_matrix_func <- function(mat , t, bonf=T, cor_type='normal'){
 }
 
 
-
-
 plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='normal'){
-  
   adj_mat_1 <- adj_matrix_func(mat_1, t = t, bonf=bonf, cor_type = cor_type)
   adj_mat_2 <- adj_matrix_func(mat_2, t = t, bonf=bonf, cor_type=cor_type)
   
@@ -159,6 +155,9 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
   if(sum(adj_mat_1) == 116 & sum(adj_mat_2)==116){
     return('There are no edges. Try with lower value of t')
   }
+  
+  colnames(adj_mat_1) <- colnames(mat_1)
+  colnames(adj_mat_2) <- colnames(mat_2)
   
   #### Create Graphs
   g1 <- graph.adjacency(adj_mat_1, mode = "undirected", diag = FALSE )
@@ -172,21 +171,17 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
     V(g1)$color[i] <- colors[strtoi(substr(V(g1)$name[i],1,1))]
     V(g2)$color[i] <- colors[strtoi(substr(V(g2)$name[i],1,1))] }
   
-  
   #### Change edges colors based on if they are present in both graphs or in only one
   for(i in 1:length(E(g1))){
     edge <- as_ids(E(g1)[i])
     if(edge %in% as_ids(E(g2))){E(g1)[i]$color = 'black'}
     else{E(g1)[i]$color = 'blue'} }
   
-  
   for(i in 1:length(E(g2))){
     edge <- as_ids(E(g2)[i])
     if(edge %in% as_ids(E(g1))){E(g2)[i]$color = 'black'}
     else{E(g2)[i]$color = 'red'} }
   
-  
-  #### Import ROI coordinates
   load('data/coordinates.RData')
   coord <- aal116coordinates
   
@@ -220,22 +215,14 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
               vertex.size=7, vertex.label.cex=.5, vertex.color=V(graph)$color,
               edge.width=4, edge.color=E(graph)$color,
               layout=layout, main=main) }}
+  
 }
 
 
-plot_graphs(TD, ASD ,t = 0.3 , dimensions=2, bonf=F, cor_type='partial')
 
-pcor(ASD)$estimate
-
-suppressWarnings
-
-
-
-
-
+plot_graphs(TD,ASD, .9, cor_type = 'partial')
 
 # GIFs --------------------------------------------------------------------
-
 
 gif_generator <- function(grid_t, cor_type, bonf, display=TRUE, save=TRUE){
   if(bonf){ bonf <- 'bonf' } else{bonf <- 'no_bonf'}
@@ -266,7 +253,6 @@ gif_generator <- function(grid_t, cor_type, bonf, display=TRUE, save=TRUE){
               path = paste0("images/gifs/brain_graph_", cor_type, "_cor_", bonf,".gif")) }
   
 }
-
 
 
 
