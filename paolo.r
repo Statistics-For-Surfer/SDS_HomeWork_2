@@ -89,7 +89,8 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
     corr_matrix <- cor(data) }
   if(cor_type == 'partial'){
     g <- D-2
-    corr_matrix <- pcor(data) }
+    corr_matrix <- pcor(data)$estimate
+    }
   
   #### Computing Fisher Z-Transform
   Z_j_k_td <- (1/2)*log((1+corr_matrix)/(1-corr_matrix))
@@ -112,8 +113,8 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
 }
 
 
-
-
+a <-lower_or_upper(TD , "L", cor_type='partial')
+a
 
 adj_matrix_func <- function(mat , t){
   L <-  lower_or_upper(mat , "L")
@@ -264,4 +265,17 @@ points(sort(cor(TD)), col = "#CB3234", cex =  .3)
 legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2,  border = "white")
 
 
+?cor.test
+?pcor
+??pcor
+a_prova <- pcor(TD , method = "pearson")$estimate
+dim(a_prova)
+dim(a_prova$estimate)
+a$
+?pcor
 
+a$statistic
+a$statistic
+pcor(ASD)
+
+-2.33 * sqrt(.5**2 / 200) + .5
