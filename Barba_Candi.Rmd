@@ -423,11 +423,10 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
 
 
 
-#::: {align="center"}
-#<img src="images/gifs/median/brain_graph_normal_corr_bonf.gif" class="center" #width="650" height="400"/>
-#:::
+
 ```
 
+<img src="images/gifs/median/brain_graph_normal_corr_bonf.gif" width="650" height="400">
 
 
 ### Explanation of the plots
@@ -453,10 +452,10 @@ The first pair of plots are built according to the Bonferroni family-wise adjust
 ```{r CIS PLOTS ,  warning = FALSE}
 
 relation_CI <- function(data, cor_type='normal'){
-  a_norm <-  lower_or_upper(data , "L" , cor_type = cor_type , bonferroni= F)
-  b_norm <-  lower_or_upper(data , "U" , cor_type = cor_type , bonferroni= F)
-  a_bonf <-  lower_or_upper(data , "L" , cor_type = cor_type , bonferroni= T)
-  b_bonf <- lower_or_upper(data , "U" , cor_type = cor_type , bonferroni= T)
+  a_norm <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= F)
+  b_norm <-  lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= F)
+  a_bonf <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= T)
+  b_bonf <- lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= T)
   ls <-  sort(unique(a_norm))
   us <-  sort(unique(b_norm))
   ls_bon <- sort(unique(a_bonf)) 
@@ -520,13 +519,13 @@ Since the variance it's greater the final confidence intervals will be wiser tha
 
 
 
-```{r plotss2 ,  warning = FALSE}
+```{r plotssed2 ,  warning = FALSE}
 
 relation_CI_par_pear <- function(data, bonferroni = T){
-  a_norm <-  lower_or_upper(data , "L" , cor_type = 'normal' , bonferroni= bonferroni )
-  b_norm <-  lower_or_upper(data , "U" , cor_type = 'normal' , bonferroni= bonferroni )
-  a_par <-  lower_or_upper(data , "L" , cor_type = 'partial', bonferroni= bonferroni)
-  b_par <- lower_or_upper(data , "U" , cor_type =   'partial' , bonferroni= bonferroni)
+  a_norm <-  lower_or_upper( data , bound = "L" , cor_type = 'normal' , bonferroni= bonferroni )
+  b_norm <-  lower_or_upper(data , bound = "U" , cor_type = 'normal' , bonferroni= bonferroni )
+  a_par <-  lower_or_upper(data , bound ="L" , cor_type = 'partial', bonferroni= bonferroni)
+  b_par <- lower_or_upper(data , bound ="U" , cor_type =   'partial' , bonferroni= bonferroni)
   ls <-  sort(unique(a_norm))
   us <-  sort(unique(b_norm))
   ls_par <- sort(unique(a_par)) 
