@@ -31,12 +31,13 @@ suppressMessages(library(igraph))
 
 ```
 
-## Purpose
+## Purpose & Statistical tools used
 
-The goal of the project is to analyze differences in fMRI (functional magnetic resonance imaging) between subjects with autism spectrum disorder (ASD) and Typically Developed (TD) subjects.
+The goal of the project is to analyze differences in fMRI (functional magnetic resonance imaging) between subjects with autism spectrum disorder (ASD) and Typically Developed (TD) subjects in order to highlight the possible difference that can be analyzed with more focus on medical study.
+In order to reach this goal we used statistical tools as Hypothesis test based on asymptotic confidence intervals for the Pearson's correlation coefficient $\rho$ and partial correlation coefficient $\rho^{(P)}$.
+Differences between the two approaches will be shown later
 
 ## Dataset
-
 ```{r dataset}
 
 load('data/hw2_data.RData')
@@ -44,13 +45,13 @@ load('data/coordinates.RData')
 
 ```
 
-The dataset we used for the sake of this project is ABIDE (Autism Brain Imaging Data Exchange); collection of brain imaging data and clinical information from individuals with autism spectrum disorder (ASD) and typically developing (TD) controls.
+The dataset we used for the sake of this project is ABIDE (Autism Brain Imaging Data Exchange); a collection of brain imaging data and clinical information from individuals with autism spectrum disorder (ASD) and typically developing (TD) controls.
 
-The dataset consists of a of structural and functional MRI data from over 12 individuals with ASD and 12 TD controls.
+The dataset consists a of structural and functional fMRI data from over 12 individuals with ASD and 12 TD controls.
 
-For each subject we have $n =145$ fMRI results for each of the $D = 116$ cortical regions.
+For each subject, we have $n =145$ fMRI results for each of the $D = 116$ cortical regions.
 
-Brief explanation (Without being an expert) in what ABIDE dataset contains:
+Brief explanation (Without being an expert) of what ABIDE dataset contains:
 
 -   fMRI measures brain activity by detecting changes in blood flow.
 
@@ -62,21 +63,21 @@ The eight cortical regions in the ABIDE dataset are:
 
 -   <font color="#FFFF66"> Limbic system </font>: is involved in behavioural and emotional responses.
 
--   <font color= "#CB3234"> Occipital lobe </font>: is involved visual perception, including colour, form and motion.
+-   <font color= "#CB3234"> Occipital lobe </font>: is involved in visual perception, including color, form, and motion.
 
--   <font color="#E1E1E2"> Parietal lobe </font>: is responsible of sensory perception and integration, like: taste, hearing, sight, touch, and smell.
+-   <font color="#E1E1E2"> Parietal lobe </font>: is responsible for sensory perception and integration, like taste, hearing, sight, touch, and smell.
 
 -   <font color="#ff8c69"> SCGM </font>: is involved in process information.
 
--   <font color="#7fffd4"> Temporal lobe </font>:is involved in retention of visual memory, language comprehension, and emotion association.
+-   <font color="#7fffd4"> Temporal lobe </font>: is involved in the retention of visual memory, language comprehension, and emotion association.
 
--   <font color="#ABCDEF"> Cerebellum </font>: is involved for muscle control, including balance and movement..
+-   <font color="#ABCDEF"> Cerebellum </font>: is involved in muscle control, including balance and movement.
 
-[TODO] color the names of the regions based on the names in the brain network image [TODO] insert the reference
+[TODO] References
 
 ## Pre-processed
 
-Since data were taken in different labs, it's worth to remove to see and to remove the lab-specific effect. For instance we can have a look at the distribution of fMRI at the same cortical region for two difference subject in the same group but taken in different laboratory.
+Since data were taken in different labs, it's worth seeing and removing the lab-specific effect. For instance, we can have a look at the distribution of fMRI at the same cortical region for two difference subjects in the same group but taken in a different laboratory.
 
 ```{r data - preproocessing 1 , warning = FALSE}
 
@@ -98,7 +99,7 @@ box()
 
 ```
 
-To remove the subject-specific effect we subtract the 116 time series arithmetic meansand divide by their corresponding across time standard deviations.
+To remove the subject-specific effect we subtract the 116 time series arithmetic means and divide by their corresponding across time standard deviations.
 
 ```{r data - preproocessing 2  }
 scale_datasets_list <- function(ls){
@@ -120,8 +121,13 @@ asd_sel_scale <- scale_datasets_list(asd_sel)
 
 ## Pool Together
 
-To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data. To be more robust on the analysis we take the median as the statisical summary.
+To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data.
+For the continuation we take two different statistical summary.
 
+- Median : As a robust position index insensitive to changes in scale that the  measurements can have
+
+- Standard deviation :as a relevant statistics in order to study ROI co-variation in variability.
+ 
 We assumed within group double independence (across time and subjects), we will not consider the time dependency and so we treat the data as $i.i.d.$.
 
 ```{r data pool together }
@@ -161,35 +167,40 @@ ASD <- summary_dataset(asd_sel_scale, metric='median')
 
 ```
 
-As a consequence of this approach we end up with two $116 \times 116$ matrices,rappresent the correlations between all the cortical region for the two groups.
+As a consequence of this approach, we end up with two $116 \times 116$ matrices, that represent the correlations between all the cortical regions for the two groups.
 
-Correlations might be used to examine the relationship between brain fMRI data. By calculating correlations between these regions, we can determine whether there is a relationship and how strong it is.It is a way of understanding how different regions of the brain are connected and how they influence each other's activity. If two brain regions consistently show strong positive correlations, it means that their activity tends to increase or decrease together, it might suggest that they are strongly connected and influence each other's activity.
+Correlations might be used to examine the relationship between brain fMRI data. By calculating correlations between these regions, we can determine whether there is a relationship and how strong it is. It is a way of understanding how different regions of the brain are connected and how they influence each other's activity. If two brain regions consistently show strong positive correlations, it means that their activity tends to increase or decrease together, it might suggest that they are strongly connected and influence each other's activity.
 
-First we can have a look at the empirical distribution of the Pearson correlation coefficients within the groups.The distribution of correlations can provide insights into brain function and can be helpful to understand how different brain regions contribute to various cognitive processes.
+First, we can have a look at the empirical distribution of the Pearson correlation coefficients within the groups. The distribution of correlations can provide insights into brain function and can be helpful to understand how different brain regions contribute to various cognitive processes.
 
 ```{r histograms correlations coefficient, warning = FALSE}
+corr_distr_fun <- function(data_1 , data_2 , metric){
+  pTD  <-  summary_dataset(data_1 , metric = metric)
+  pASD <-  summary_dataset( data_2, metric = metric)
+  par(mfrow = c(1,2))
+  hist(cor(pTD) ,
+       main = "Histograms of correlation \n coefficients for TD subject",
+       xlab = expression(hat(rho)) , 
+       border = "white" , 
+       col = "#E52B50"  , freq = FALSE )
+  box()
+  hist(cor(pASD) ,
+       main = "Histograms of correlation\n coefficients for ASD subject",
+       xlab = expression(hat(rho)) , 
+       border = "white" , 
+       col = "#E52B50", freq = FALSE )
+  box()
+  par(mfrow = c(1,1))
+}
 
-par(mfrow = c( 1 ,2 ))
-
-hist(cor(TD) ,
-     main = "Histograms of correlation \n coefficients for TD  subject",
-     xlab = expression(hat(rho)) , 
-     border = "white" , 
-     col = "#E52B50"  , freq = FALSE )
-box()
-
-hist(cor(ASD) ,
-     main = "Histograms of correlation\n coefficients for ASD subject",
-     xlab = expression(hat(rho)) , 
-     border = "white" , 
-     col = "#E52B50", freq = FALSE )
-box()
+corr_distr_fun(td_sel_scale , asd_sel_scale , metric = "median")
+corr_distr_fun(td_sel_scale , asd_sel_scale , metric = "sd")
 
 ```
 
-For evaluating dependency between cortical regions we have been used the association graph.
+For evaluating dependency between cortical regions we have used the association graph.
 
-For each pair {j,k} of cortical regions we tested at confidence level setted to $\alpha = 0.05$if they are uncorelleated:
+For each pair {j,k} of cortical regions we tested at a confidence level set to $\alpha = 0.05$if they are uncorrelated:
 
 ```{=tex}
 \begin{cases}
@@ -199,7 +210,35 @@ For each pair {j,k} of cortical regions we tested at confidence level setted to 
 ```
 To test so, we compute for each pair {j,k} the confidence intervals, rejecting the null Hypothesis if the intervals does not intersect with the value 0.
 
-Generically, having a threshold t , we can require a as we like strong correlation between the ares.
+Generically, having a threshold t , we can require a as we like strong correlation between the ares placing an edge between feature $j$ and feature $k$
+whenever [−t, +t] ∩ Cj,k (α) = ∅ (the empty-set).
+
+### Choice of the threshold t
+
+
+Since we care only about the strongness of the correlation between two areas we consider to slice the threshold t over the absolute values of percentiles of the distribution of $\rho$.
+
+```{r quantile distributions , warning = FALSE}
+quantile_distr_func <- function(data1 , data2 , metric){
+  pTD  <-  summary_dataset(data1 , metric = metric)
+  pASD <-  summary_dataset(data2, metric = metric)
+  q1   <-  sort(abs(cor(pTD))) 
+  q2   <-  sort(abs(cor(pASD))) 
+  par(mfrow = c(1,2))
+  plot(q1 , main = "Quantile distribution of correlation \n  coefficient for TD subject",
+       col = "#ffff66" , cex = .3)
+  grid()
+  plot(q2 , main = "Quantile distribution of correlation \n  coefficient for ASD subject",
+       col = "#ffff66" , cex = .3)
+  grid()
+  par(mfrow = c(1,1))
+}
+quantile_distr_func(td_sel_scale , asd_sel_scale , metric = "median")
+quantile_distr_func(td_sel_scale , asd_sel_scale , metric = "sd")
+```
+
+
+
 
 ### Process to compute the Confidence intervals
 
