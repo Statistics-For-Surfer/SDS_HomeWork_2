@@ -345,7 +345,7 @@ adj_matrix_func <- function(mat , t, bonf=T, cor_type='normal', delta = NULL , d
 
 The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex--set and E the edge--set.The edge--set E is as a (D × D) adjacency matrix E where E(j, k) = 1 if there is an edge between regions j and regions k and 0 otherwise.
 
-After all we can visualize the association graph f0r the two groups slicing the value of threshold t in order to see co-activation differences.
+After all we can visualize the association graph for the two groups slicing the value of threshold t in order to see co-activation differences.
 
 ```{r plot , warning = FALSE }
 plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='normal'){
@@ -426,22 +426,37 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
 
 ```
 
-<img src="images/gifs/median/brain_graph_normal_corr_bonf.gif" width="650" height="400">
+Normal correlation
+
+<img src="images/brain_graph_normal_cor_bonf.gif" width="450" height="275" /> <img src="images/brain_graph_normal_cor_no_bonf.gif" width="450" height="275" />
+
+Partial Correlation
+
+<img src="images/brain_graph_partial_cor_bonf.gif" width="450" height="275" /> <img src="images/brain_graph_partial_cor_no_bonf.gif" width="450" height="275" />
 
 
 ### Explanation of the plots
 
-The plots rappresents the two graphs one for each group where:
+On the left we find the correlation graphs maded using Bonferroni adjustment and on the right without it.
+The plots represents the two graphs one for each group where:
 
--   each node rapprsents a cortical region of the brain, the color of the nodes identify one of the eight main areas (previously explained ) it belongs.
+-   each node represents a cortical region of the brain, the color of the nodes identify one of the eight main areas (previously explained ) it belongs.
 
--   each edge rappresents a strongest than the setted threshold t linear correlation between the two ares, the color of the edge has the following meaning:
+-   each edge represents a strongest than the setted threshold t linear correlation between the two ares, the color of the edge has the following meaning:
 
     black: if both the two graph have the edge in common.
 
     blue: if only the TD graph has the edge.
 
     red: if only the ASD graph has the edge.
+    
+    
+Delta
+
+<img src="images/delta_normal_bonf.gif" width="300" height="400" /> <img src="images/delta_normal_no_bonf.gif" width="300" height="400" />
+
+<img src="images/delta_partial_bonf.gif" width="300" height="400" /> <img src="images/delta_partial_no_bonf.gif" width="300" height="400" />
+
 
 ## Statistical properties:
 
