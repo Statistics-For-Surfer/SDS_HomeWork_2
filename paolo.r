@@ -120,6 +120,12 @@ corr_distr_fun(td_sel_scale , asd_sel_scale , metric = "sd")
 
 
 
+
+
+
+
+
+
 quantile_distr_func <- function(data1 , data2 , metric){
   pTD  <-  summary_dataset(data1 , metric = metric)
   pASD <-  summary_dataset(data2, metric = metric)
@@ -127,7 +133,7 @@ quantile_distr_func <- function(data1 , data2 , metric){
   q2   <-  sort(cor(pASD)) 
   par(mfrow = c(1,2))
   plot(q1 , main = "Quantile distribution of correlation \n  coefficient for TD subject",
-       col = "#ffff66" , cex = .3)
+       col = "#ffff66" , cex = .3 , xli)
   grid()
   plot(q2 , main = "Quantile distribution of correlation \n  coefficient for ASD subject",
        col = "#ffff66" , cex = .3)
@@ -139,10 +145,14 @@ quantile_distr_func(td_sel_scale , asd_sel_scale , metric = "sd")
 
 
 
+quantile(abs(cor(TD)), 0 )
 
 
+?cor
 
-lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
+lower_or_upper <- function(data, data2 = NULL , bound, cor_type='normal', bonferroni=TRUE, delta = F ){
+  
+  
   
   #### Setting Parameters
   n <- dim(data)[1]
@@ -152,7 +162,7 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
   
   #### Bonferroni Correction
   if(bonferroni == TRUE){ alpha <- alpha / m }
-  
+  if (delta == F){
   #### Use "Correlation" or "Partial Correlation"
   if(cor_type == 'normal'){
     g <- 0
@@ -160,7 +170,19 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
   if(cor_type == 'partial'){
     g <- D-2
     corr_matrix <- pcor(data)$estimate
-  }
+  }}
+  if (delta == T){
+    #### Use "Correlation" or "Partial Correlation"
+    if(cor_type == 'normal'){
+      g <- 0
+      corr_matrix1 <- cor(data)
+      corr_matrix2 <- cor(data2)
+      corr_matrix <- corr_matrix1 - corr_matrix2}
+    if(cor_type == 'partial'){
+      g <- D-2
+      corr_matrix1 <- pcor(data)$estimate
+      corr_matrix2 <- pcor(data2)$estimate
+      corr_matrix <- corr_matrix1 - corr_matrix2}}
   
   #### Computing Fisher Z-Transform
   Z_j_k_td <- (1/2)*log((1+corr_matrix)/(1-corr_matrix))
@@ -202,9 +224,11 @@ lower_or_upper <- function(data, bound, cor_type='normal', bonferroni=TRUE){
 }
 
 
-adj_matrix_func <- function(mat , t, bonf=T, cor_type='normal'){
-  L <-  lower_or_upper(mat , "L", bonferroni=bonf, cor_type=cor_type)
-  U <-  lower_or_upper(mat , "U", bonferroni= bonf, cor_type=cor_type)
+
+
+adj_matrix_func <- function(mat , t, bonf=T, cor_type='normal', delta = NULL , data2 = NULL){
+  L <-  lower_or_upper(mat , "L", bonferroni= bonf, cor_type=cor_type , delta = delta, data2 = data2 )
+  U <-  lower_or_upper(mat , "U", bonferroni= bonf, cor_type=cor_type , delta = delta, data2 = data2)
   adj <- as.matrix(L > t | U < -t)
   return(adj)
 }
@@ -285,13 +309,39 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
 
 
 
+relation_CI <- function(data, cor_type='normal'){
+  a_norm <-  lower_or_upper(data , "L" , cor_type = cor_type , bonferroni= F)
+  b_norm <-  lower_or_upper(data , "U" , cor_type = cor_type , bonferroni= F)
+  a_bonf <-  lower_or_upper(data , "L" , cor_type = cor_type , bonferroni= T)
+  b_bonf <- lower_or_upper(data , "U" , cor_type = cor_type , bonferroni= T)
+  ls <-  sort(unique(a_norm))
+  us <-  sort(unique(b_norm))
+  ls_bon <- sort(unique(a_bonf)) 
+  us_bon <- sort(unique(b_bonf))
+  xs <- 1:length(ls_bon)
+  par(mfrow = c(1,1))
+  plot(ls, col = "white" , main = "Asyntotic confidence intervals of rho \n 
+     with & without Bonferroni correction", 
+       xlab = "" , ylab = "Lower and Upper Bound" , ylim = c(-1,1))
+  
+  segments(x0 = xs , y0 = ls_bon , x1 = xs , y1 = us_bon,  col = "lightblue")
+  segments(x0 = xs , y0 = ls , x1 = xs , y1 = us,  col = "gold")
+  legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2 , bty = "n" )
+  if (cor_type == "normal"){
+  points(sort(cor(data)), col = "#CB3234", cex =  .3)}
+  if (cor_type == "partial"){
+    points(sort(pcor(data)$estimate), col = "#CB3234", cex =  .3)
+  }
+  
+
+  
+}
+
+relation_CI(TD , cor_type = "normal")
 
 
 
-a_norm = lower_or_upper(TD , "L" , cor_type='normal', bonferroni=TRUE )
-b_norm =lower_or_upper(TD , "U" , cor_type='normal', bonferroni=TRUE )
-a_par = lower_or_upper(TD , "L" , cor_type='partial', bonferroni=TRUE )
-b_par = lower_or_upper(TD , "U" , cor_type='partial', bonferroni=TRUE )
+
 
 
 Ls_n <-sort(a_norm)
@@ -357,5 +407,26 @@ ASD <- summary_dataset(asd_sel_scale, metric='sd')
 gif_generator(grid_t, index='sd', cor_type = 'partial', bonf = F, save = T, display=T)
 
 
-curve(qnorm(x))
+relation_CI_par_pear <- function(data, bonferroni = T){
+  a_norm <-  lower_or_upper(data , "L" , cor_type = 'normal' , bonferroni= bonferroni )
+  b_norm <-  lower_or_upper(data , "U" , cor_type = 'normal' , bonferroni= bonferroni )
+  a_par <-  lower_or_upper(data , "L" , cor_type = 'partial', bonferroni= bonferroni)
+  b_par <- lower_or_upper(data , "U" , cor_type =   'partial' , bonferroni= bonferroni)
+  ls <-  sort(unique(a_norm))
+  us <-  sort(unique(b_norm))
+  ls_par <- sort(unique(a_par)) 
+  us_par <- sort(unique(b_par))
+  xs <- 1:length(ls)
+  par(mfrow = c(1,1))
+  plot(ls, col = "white" , main = "Asyntotic confidence intervals of Pearson's and partial \n correlation coefficient", 
+       xlab = "" , ylab = "Lower and Upper Bound" , ylim = c(-1,1))
+  
+  segments(x0 = xs , y0 = ls_par , x1 = xs , y1 = us_par,  col = "lightblue")
+  segments(x0 = xs , y0 = ls , x1 = xs , y1 = us,  col = "gold")
+  legend("topleft" , c("With Partial correlation" , "With Pearson correlation") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2 , bty = "n" )
+  points(sort(cor(data)), col = "#CB3234", cex =  .3)
+  
+  points(sort(pcor(data)$estimate), col = "green", cex =  .3)
+}
 
+relation_CI_par_pear(TD , bonferroni = T )
