@@ -615,7 +615,7 @@ We can highlight the structural difference in the association graph, built witho
 
 <img src="images/brain_graph_partial_cor_bonf.gif" width="450" height="275"/> <img src="images/brain_graph_partial_cor_no_bonf.gif" width="450" height="275"/>
 
-This is completely justified by the below plots, where it shown the difference graph, with and without Bonferroni correction.
+This is completely justified by the below plots, where they shown the difference graph, with and without Bonferroni correction.
 
 
 [<b>Difference graph with Bonferroni adjustment</b>]{style="float:left;"} [<b>Difference graph without Bonferroni adjustment</b>]{style="float:right;"}
