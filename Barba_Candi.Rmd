@@ -33,7 +33,7 @@ suppressMessages(library(igraph))
 
 ## Purpose & Statistical tools used
 
-The goal of the project is to analyze differences in fMRI (functional magnetic resonance imaging) between subjects with autism spectrum disorder (ASD) and Typically Developed (TD) subjects in order to highlight the possible difference that can be analyzed with more focus on medical study. In order to reach this goal we used statistical tools as Hypothesis test based on asymptotic confidence intervals for the Pearson's correlation coefficient $\rho$ and partial correlation coefficient $\rho^{(P)}$. Differences between the two approaches will be shown later
+The goal of the project is to analyze differences in fMRI (functional magnetic resonance imaging) between subjects with autism spectrum disorder (ASD) and Typically Developed (TD) subjects in order to highlight the possible difference that can be analyzed with more focus on medical study. In order to reach this goal we used statistical tools as Hypothesis test based on asymptotic confidence intervals for the Pearson's correlation coefficient $\rho$ and partial correlation coefficient $\rho^{(P)}$. Differences between the two approaches will be shown later.
 
 ## Dataset
 
@@ -124,6 +124,8 @@ To achieve the goal of enhance the separation between ASD and TD subjects, we po
 
 We assumed within group double independence (across time and subjects), we will not consider the time dependency and so we treat the data as $i.i.d.$.
 
+Therefore we will study correlation between medians for both the two groups.
+
 ```{r data pool together }
 #### Mean by cell given list of datasets
 cells_value_array <- function(ls, i, j){
@@ -200,7 +202,7 @@ corr_distr_fun(td_sel_scale , asd_sel_scale , metric = "median")
 
 For evaluating dependency between cortical regions we have used the association graph.
 
-For each pair {j,k} of cortical regions we tested at a confidence level set to $\alpha = 0.05$if they are uncorrelated:
+For each pair {j,k} of cortical regions we tested at a confidence level set to $\alpha = 0.05$ if they are uncorrelated:
 
 ```{=tex}
 \begin{cases}
@@ -214,7 +216,7 @@ Generically, having a threshold t , we can require a as we like strong correlati
 
 ### Choice of the threshold t
 
-Since we care only about the strongness of the correlation between two areas we consider slicing the threshold t over the absolute values of percentiles of the distribution of $\rho$.
+Since we care only about the strongness of the correlation between two areas, we consider the threshold t slicing over the absolute values of percentiles of the distribution of $\rho$.
 
 ```{r quantile distributions , warning = FALSE , echo = FALSE , fig.width = 10}
 quantile_distr_func <- function(data1 , data2 , metric){
@@ -240,7 +242,7 @@ quantile_distr_func <- function(data1 , data2 , metric){
 quantile_distr_func(td_sel_scale , asd_sel_scale , metric = "median")
 ```
 
-We will slide t over the percentile from 0 to 0.7 showing the differences in the number of edges and discovering which edge will be more resilient.
+We will slide t over the percentiles from 0 to 0.7 showing the differences in the number of edges and discovering which edge will be more resilient.
 
 ### Process to compute the Confidence intervals
 
@@ -347,7 +349,7 @@ adj_matrix_func <- function(mat , t, bonf=T, cor_type='normal', delta = NULL , d
 }
 ```
 
-The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex--set and E the edge--set.The edge--set E is as a (D × D) adjacency matrix E where E(j, k) = 1 if there is an edge between regions j and regions k and 0 otherwise.
+The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex-set and E the edge-set.The edge-set E is as a (D × D) adjacency matrix E where E(j, k) = 1 if there is an edge between regions j and regions k and 0 otherwise.
 
 After all we can visualize the association graph for the two groups slicing the value of threshold t in order to see co-activation differences.
 
@@ -436,7 +438,7 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
 
 ### Explanation of the plots
 
-The plots above describe the association graphs built using Bonferroni correction and the ones below are built without
+The plots above describe the association graphs built using Bonferroni correction and the ones below are built without.
 
 The plots represents the two association graph one for each group where:
 
@@ -602,10 +604,30 @@ relation_CI_par_pear(TD , bonferroni = F )
 
 ```
 
+As we can see using Bonferroni correction the confidence intervals for $\rho_{j,k}^{(P)}$ always intersect with zero, meaning that, it will not be any edge in the association graph. 
+
+
+
+
+We can highlight the structural difference in the association graph, built without using Bonferroni correction. It means that the actual difference between brain's connection for the two groups is not in a specif area but instead on the structure of the connections.
+
 [<b>Partial correlation with Bonferroni adjustment</b>]{style="float:left;"} [<b>Partial correlation without Bonferroni adjustment</b>]{style="float:right;"}
 
 <img src="images/brain_graph_partial_cor_bonf.gif" width="450" height="275"/> <img src="images/brain_graph_partial_cor_no_bonf.gif" width="450" height="275"/>
 
+This is completely justified by the below plots, where it shown the difference graph, with and without Bonferroni correction.
+
+
 [<b>Difference graph with Bonferroni adjustment</b>]{style="float:left;"} [<b>Difference graph without Bonferroni adjustment</b>]{style="float:right;"}
 
 <img src="images/delta_partial_bonf.gif" width="300" height="400"/> <img src="images/delta_partial_no_bonf.gif" align="right" width="300" height="400"/>
+
+
+### Conclusion
+
+In conclusion, this study have found that subjects with autism tend to have differences in the way that different brain regions are connected and communicate with each other. These differences may be related to the problem solving and executive function.However, the brain changes associated with autism can vary from persono to person and a sample of twelve people per group may not catch all the actual differences that exist. 
+
+
+
+
+
