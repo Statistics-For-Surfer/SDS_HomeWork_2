@@ -33,11 +33,10 @@ suppressMessages(library(igraph))
 
 ## Purpose & Statistical tools used
 
-The goal of the project is to analyze differences in fMRI (functional magnetic resonance imaging) between subjects with autism spectrum disorder (ASD) and Typically Developed (TD) subjects in order to highlight the possible difference that can be analyzed with more focus on medical study.
-In order to reach this goal we used statistical tools as Hypothesis test based on asymptotic confidence intervals for the Pearson's correlation coefficient $\rho$ and partial correlation coefficient $\rho^{(P)}$.
-Differences between the two approaches will be shown later
+The goal of the project is to analyze differences in fMRI (functional magnetic resonance imaging) between subjects with autism spectrum disorder (ASD) and Typically Developed (TD) subjects in order to highlight the possible difference that can be analyzed with more focus on medical study. In order to reach this goal we used statistical tools as Hypothesis test based on asymptotic confidence intervals for the Pearson's correlation coefficient $\rho$ and partial correlation coefficient $\rho^{(P)}$. Differences between the two approaches will be shown later
 
 ## Dataset
+
 ```{r dataset}
 
 load('data/hw2_data.RData')
@@ -73,14 +72,13 @@ The eight cortical regions in the ABIDE dataset are:
 
 -   <font color="#ABCDEF"> Cerebellum </font>: is involved in muscle control, including balance and movement.
 
-[Reference of ABIDE](https://fcon_1000.projects.nitrc.org/indi/abide/)  where we got the above information.
-
+[Reference of ABIDE](https://fcon_1000.projects.nitrc.org/indi/abide/) where we got the above information.
 
 ## Pre-processed
 
 Since data were taken in different labs, it's worth seeing and removing the lab-specific effect. For instance, we can have a look at the distribution of fMRI at the same cortical region for two difference subjects in the same group but taken in a different laboratory.
 
-```{r data - preproocessing 1 , warning = FALSE , echo = FALSE}
+```{r data - preproocessing 1 , warning = FALSE , echo = FALSE , fig.width = 10}
 
 sub_1 <- td_sel$caltech_0051487$`2001`
 sub_2 <- td_sel$trinity_0050259$`2001`
@@ -122,11 +120,9 @@ asd_sel_scale <- scale_datasets_list(asd_sel)
 
 ## Pool Together
 
-To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data.
-For the continuation we take median ( Index insensitive  to changes in scale that the  measurements can have) as the statistical summary to have more robustness in the analysis.
+To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data. For the continuation we take median ( Index insensitive to changes in scale that the measurements can have) as the statistical summary to have more robustness in the analysis.
 
 We assumed within group double independence (across time and subjects), we will not consider the time dependency and so we treat the data as $i.i.d.$.
-
 
 ```{r data pool together }
 #### Mean by cell given list of datasets
@@ -171,7 +167,7 @@ Correlations might be used to examine the relationship between brain fMRI data. 
 
 First, we can have a look at the empirical distribution of the Pearson correlation coefficients within the groups. The distribution of correlations can provide insights into brain function and can be helpful to understand how different brain regions contribute to various cognitive processes.
 
-```{r histograms correlations coefficient, warning = FALSE , echo = FALSE}
+```{r histograms correlations coefficient, warning = FALSE , echo = FALSE , fig.width = 10}
 corr_distr_fun <- function(data_1 , data_2 , metric){
   pTD  <-  summary_dataset(data_1 , metric = metric)
   pASD <-  summary_dataset( data_2, metric = metric)
@@ -214,15 +210,13 @@ For each pair {j,k} of cortical regions we tested at a confidence level set to $
 ```
 To test so, we compute for each pair {j,k} the confidence intervals, rejecting the null Hypothesis if the intervals does not intersect with the value 0.
 
-Generically, having a threshold t , we can require a as we like strong correlation between the ares placing an edge between feature $j$ and feature $k$
-whenever [−t, +t] ∩ Cj,k (α) = ∅ (the empty-set).
+Generically, having a threshold t , we can require a as we like strong correlation between the ares placing an edge between feature $j$ and feature $k$ whenever [−t, +t] ∩ Cj,k (α) = ∅ (the empty-set).
 
 ### Choice of the threshold t
 
-
 Since we care only about the strongness of the correlation between two areas we consider slicing the threshold t over the absolute values of percentiles of the distribution of $\rho$.
 
-```{r quantile distributions , warning = FALSE , echo = FALSE}
+```{r quantile distributions , warning = FALSE , echo = FALSE , fig.width = 10}
 quantile_distr_func <- function(data1 , data2 , metric){
   pTD  <-  summary_dataset(data1 , metric = metric)
   pASD <-  summary_dataset(data2, metric = metric)
@@ -246,8 +240,7 @@ quantile_distr_func <- function(data1 , data2 , metric){
 quantile_distr_func(td_sel_scale , asd_sel_scale , metric = "median")
 ```
 
-
-We will slide t over the percentile from $\rho = 0 $  to $\rho = 0.7 $ showing the differences in the number of edges and discovering which edge will be more resilient.
+We will slide t over the percentile from 0 to 0.7 showing the differences in the number of edges and discovering which edge will be more resilient.
 
 ### Process to compute the Confidence intervals
 
@@ -261,7 +254,7 @@ Once converted the correlations coefficients to z-scores, we can use the normal 
 
 Since we are dealing with family wise test, in order to control the probability of making at least one error we can adjust the $\alpha$ confidence level by using Bonferroni Correction. The confidence level would be divided by the number of correlations coefficient we are testing $\binom{D}{2} = \frac{116 \times 115}{2} = 6.670$.
 
-The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. Since \$\alpha\_{b} = \frac{\alpha}{m} = \frac{.05}{6670} = 0,00075 \$ the confidence intervals results wider, more often intersecting the interval $(-t, t)$ . It results on the conclusion of don't put edges between cortical regions where it should be.
+The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. Since $\alpha_{bon}= \frac{\alpha}{m} = 0,0007$ the confidence intervals results wider, more often intersecting the interval $[-t, t]$ . It results on the conclusion of don't put edges between cortical regions where it should be.
 
 ```{r Confidence intervals }
 lower_or_upper <- function(data, data2 = NULL , bound, cor_type='normal', bonferroni=TRUE, delta = F ){
@@ -358,7 +351,7 @@ The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex-
 
 After all we can visualize the association graph for the two groups slicing the value of threshold t in order to see co-activation differences.
 
-```{r plot , warning = FALSE , echo = FALSE}
+```{r plot , warning = FALSE , echo = FALSE , fig.width = 10}
 plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='normal'){
   adj_mat_1 <- adj_matrix_func(mat_1, t = t, bonf=bonf, cor_type = cor_type)
   adj_mat_2 <- adj_matrix_func(mat_2, t = t, bonf=bonf, cor_type=cor_type)
@@ -437,20 +430,13 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
 
 ```
 
-Pearson correlation with Bonferroni adjustment
+[<b>Pearson correlation with Bonferroni adjustment</b>]{style="float:left;"} [<b>Pearson correlation without Bonferroni adjustment</b>]{style="float:right;"}
 
-<img src="images/brain_graph_normal_cor_bonf.gif" width="450" height="275" /> 
-
-Pearson correlation without Bonferroni adjustment
-
-<img src="images/brain_graph_normal_cor_no_bonf.gif" width="450" height="275" />
-
-
-
+<img src="images/brain_graph_normal_cor_bonf.gif" width="450" height="275"/> <img src="images/brain_graph_normal_cor_no_bonf.gif" width="450" height="275"/>
 
 ### Explanation of the plots
 
-The plots above describe the association graphs built using Bonferroni correction and the ones below are built without 
+The plots above describe the association graphs built using Bonferroni correction and the ones below are built without
 
 The plots represents the two association graph one for each group where:
 
@@ -458,65 +444,78 @@ The plots represents the two association graph one for each group where:
 
 -   each edge represents a strongest than the set threshold t linear correlation between the two areas, the color of the edge has the following meaning:
 
-    black: if both the two graphs have the edge in common.
+    -   <font color="black">black</font>: if both the two graphs have the edge in common.
 
-    blue: if only the TD graph has the edge.
 
-    red: if only the ASD graph has the edge.
-    
-We can reformulate the problem looking at the difference graph $G^{\Delta}(t)}$
+    -   <font color="blue">blue</font>: if only the TD graph has the edge.
 
 
 
+    -   <font color="red">red</font> : if only the ASD graph has the edge.
 
+We can reformulate the problem looking at the difference graph $G^{\Delta}(t)$ where we put an edge if the asymptotic confidence interval of $|\rho_{j,k}^{ASD} - \rho_{j,k}^{TD}|$ intersect with the interval [-t;t]
 
-<img src="images/delta_normal_bonf.gif" width="300" height="400" /> <img src="images/delta_normal_no_bonf.gif" width="300" height="400" />
+[<b>Difference graph with Bonferroni adjustment</b>]{style="float:left;"} [<b>Difference graph without Bonferroni adjustment</b>]{style="float:right;"}
 
-<img src="images/delta_partial_bonf.gif" width="300" height="400" /> <img src="images/delta_partial_no_bonf.gif" width="300" height="400" />
+<img src="images/delta_normal_bonf.gif" width="300" height="400"/> <img src="images/delta_normal_no_bonf.gif" align="right" width="300" height="400"/>
 
-
-## Statistical properties:
+### Statistical properties:
 
 All the plots are built using the Person's correlation coefficient as the association measure.
 
 The first pair of plots are built according to the Bonferroni family-wise adjustment while the second one is built skipping the connection. As we could expect the unadjusted one ( since the test is based on wiser confidence intervals ) has definitely more edges than the other.
 
-```{r CIS PLOTS ,  warning = FALSE}
+The difference graph is built using as the association measure the absolute value of the difference between Persons's correlation coefficient for the two groups. It means that there is an edge if the linear relationship between two areas is strong for TD subject and weak for ASD ones and viceversa and if the Persons's coefficients are of opposite sign with a algebraic sum grater than t.
+
+In the following graph we show the confidence intervals for Pearson's coefficient of ASD subject with and without Bonferroni.
+
+```{r CIS PLOTS ,  warning = FALSE, fig.width = 10 , echo = FALSE}
 
 relation_CI <- function(data, cor_type='normal'){
   a_norm <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= F)
   b_norm <-  lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= F)
   a_bonf <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= T)
   b_bonf <- lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= T)
-  ls <-  sort(unique(a_norm))
-  us <-  sort(unique(b_norm))
-  ls_bon <- sort(unique(a_bonf)) 
-  us_bon <- sort(unique(b_bonf))
-  xs <- 1:length(ls_bon)
-  par(mfrow = c(1,1))
-  plot(ls, col = "white" , main = "Asyntotic confidence intervals of rho \n 
-     with & without Bonferroni correction", 
-       xlab = "" , ylab = "Lower and Upper Bound" , ylim = c(-1,1))
   
+  upper_tri_a_norm <- upper.tri(a_norm)
+  upper_tri_b_norm <- upper.tri(b_norm)  
+  upper_tri_a_bonf <- upper.tri(a_bonf)
+  upper_tri_b_bonf <- upper.tri(b_bonf)
+  
+  a_norm <- a_norm[upper_tri_a_norm]
+  b_norm <- b_norm[upper_tri_b_norm]
+  a_bonf <- a_bonf[upper_tri_a_bonf]
+  b_bonf <- b_bonf[upper_tri_b_bonf]
+
+  ls <-  sort(a_norm)
+  us <-  sort(b_norm)
+  ls_bon <- sort(a_bonf) 
+  us_bon <- sort(b_bonf)
+  xs <- 1:length(ls)
+  
+  mat  <-  cor(data)
+  upper_tri_1 <- upper.tri(mat)
+  mat_upper_tri_1 <- mat[upper_tri_1]
+  mat = sort(mat_upper_tri_1)
+  
+  
+  par(mfrow = c(1,1))
+  plot(ls, type = "n"  , main = expression(paste("Asyntotic confidence intervals of ", rho , " \n with & without Bonferroni correction")), 
+       xlab = "" , ylab = "Lower and Upper Bound" , ylim = c(-1,1))
   segments(x0 = xs , y0 = ls_bon , x1 = xs , y1 = us_bon,  col = "lightblue")
   segments(x0 = xs , y0 = ls , x1 = xs , y1 = us,  col = "gold")
-  legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2 , bty = "n" )
-  if (cor_type == "normal"){
-  points(sort(cor(data)), col = "#CB3234", cex =  .3)}
-  if (cor_type == "partial"){
-    points(sort(pcor(data)$estimate), col = "#CB3234", cex =  .3)
-  }
   
+  legend("topleft" , c("With Bonferroni correction" , "Without Bonferroni correction" , "Person's coefficient") , col = c("lightblue" , "#FFFF66", "#CB3234" ) , lty = 1 , lwd = 3 , bty = "n" )
+
+  points( mat , col = "#CB3234", cex =  .3)
 
   
 }
 
-relation_CI(TD , cor_type = "normal")
+relation_CI(ASD , cor_type = "normal")
 
 
 ```
-
-
 
 ## Analysis
 
@@ -526,14 +525,9 @@ Following the result of what happens to vary the threshold t from a small to a l
 
 -   edges between cortical regions in <font color="#7fffd4"> Temporal lobe </font> are resilient in both the two groups. It suggests that there are no statistical differences in order to highlight problems concerning visual memory, language comprehension, and emotional association that can be caused by autism.
 
--   edges between cortical regions in <font color="#77DD77"> Frontal lobe</font> are more resilient for the TD graph than the ASD one. It suggests that there are statistical differences between groups in this specific area that can be 
-symptom of related disorders in problem-solving and executive functions.
+-   edges between cortical regions in <font color="#77DD77"> Frontal lobe</font> are more resilient for the TD graph than the ASD one. It suggests that there are statistical differences between groups in this specific area that can be symptom of related disorders in problem-solving and executive functions.
 
-Besides a lot of connections are effectively between areas corresponding to different regions.
-Generically differences between the two groups are in the structure of the connections, meaning that there is no specific brain problem that is associated with autism. The main result is the differences in the association structure of a certain region as the Frontal lobe, which is involved in problem-solving and social processing.
-However, the brain changes associated with autism can vary from people and a sample of twelve people per group may not catch all the actual differences that exist.
-The aim of the study is to suggest possible specific problems related to autism and to do more focused research to fully understand the underlying brain abnormalities in this disorder.
-
+Besides a lot of connections are effectively between areas corresponding to different regions. Generically differences between the two groups are in the structure of the connections, meaning that there is no specific brain problem that is associated with autism. The main result is the differences in the association structure of a certain region as the Frontal lobe, which is involved in problem-solving and social processing. However, the brain changes associated with autism can vary from people and a sample of twelve people per group may not catch all the actual differences that exist. The aim of the study is to suggest possible specific problems related to autism and to do more focused research to fully understand the underlying brain abnormalities in this disorder.
 
 ## Analysis using partial correlation
 
@@ -545,50 +539,73 @@ To compute confidence intervals for a family of correlation coefficients, we sti
 
 $$\hat z_{j,k} = \frac{1}{2}log\big(\frac{1 + \hat\rho_{j,k}^{(P)}}{1 - \hat\rho_{j,k}^{(P)}}\big) = artanh(\hat\rho_{j,k}^{(P)})$$
 
-where it is asymptotically normally distributed as a gaussian with mean $z_{j,k}$ and standard deviation $\frac{1}{\sqrt{N-g-3}}$ where : $g = (D-2)$.
+where it is asymptotically normally distributed as a Gaussian with mean $z_{j,k}$ and standard deviation $\frac{1}{\sqrt{N-g-3}}$ where : $g = (D-2)$.
 
-Since the variance it's greater the final confidence intervals will be wiser than the ones built using Pearson's correlation.
+Since the variance it's greater, the final confidence intervals will be wiser than the ones built using Pearson's correlation.
 
-
-
-```{r plotssed2 ,  warning = FALSE}
+```{r plotssed2 ,  warning = FALSE , fig.width = 10 , echo = FALSE}
 
 relation_CI_par_pear <- function(data, bonferroni = T){
   a_norm <-  lower_or_upper( data , bound = "L" , cor_type = 'normal' , bonferroni= bonferroni )
   b_norm <-  lower_or_upper(data , bound = "U" , cor_type = 'normal' , bonferroni= bonferroni )
   a_par <-  lower_or_upper(data , bound ="L" , cor_type = 'partial', bonferroni= bonferroni)
   b_par <- lower_or_upper(data , bound ="U" , cor_type =   'partial' , bonferroni= bonferroni)
-  ls <-  sort(unique(a_norm))
-  us <-  sort(unique(b_norm))
-  ls_par <- sort(unique(a_par)) 
-  us_par <- sort(unique(b_par))
+  
+  upper_tri_a_norm <- upper.tri(a_norm)
+  upper_tri_b_norm <- upper.tri(b_norm)  
+  upper_tri_a_par <- upper.tri(a_par)
+  upper_tri_b_par <- upper.tri(b_par)
+  
+  a_norm <- a_norm[upper_tri_a_norm]
+  b_norm <- b_norm[upper_tri_b_norm]
+  a_par <- a_par[upper_tri_a_par]
+  b_par <- b_par[upper_tri_b_par]
+
+  
+  ls <-  sort(a_norm)
+  us <-  sort(b_norm)
+  ls_par <- sort(a_par) 
+  us_par <- sort(b_par)
   xs <- 1:length(ls)
-  par(mfrow = c(1,1))
-  plot(ls, col = "white" , main = "Asyntotic confidence intervals of Pearson's and partial \n correlation coefficient", 
+  
+  mat  <-  cor(data)
+  mat2 <-  pcor(data)$estimate
+  upper_tri_1 <- upper.tri(mat)
+  mat_upper_tri_1 <- mat[upper_tri_1]
+  upper_tri_2 <- upper.tri(mat2)
+  mat_upper_tri_2 <- mat2[upper_tri_1]
+  mat1 <- sort(mat_upper_tri_1)
+  mat2 <- sort(mat_upper_tri_2)
+  
+
+  
+  
+  main = "Asyntotic confidence intervals for \n Partial  correlation coefficient without \n Bonferroni correction"
+  if(bonferroni){main = "Asyntotic confidence intervals for \n Partial  correlation coefficient with \n Bonferroni correction"}
+  
+  
+  
+  plot(ls, type = "n" , main =  main , 
        xlab = "" , ylab = "Lower and Upper Bound" , ylim = c(-1,1))
   
-  segments(x0 = xs , y0 = ls_par , x1 = xs , y1 = us_par,  col = "lightblue")
-  segments(x0 = xs , y0 = ls , x1 = xs , y1 = us,  col = "gold")
-  legend("topleft" , c("With Partial correlation" , "With Pearson correlation") , col = c("lightblue" , "#FFFF66") , lty = 1 , lwd = 2 , bty = "n" )
-  points(sort(cor(data)), col = "#CB3234", cex =  .3)
+  segments(x0 = xs , y0 = ls_par , x1 = xs , y1 = us_par,  col = "#f5bf80")
+  segments(x0 = xs , y0 = ls , x1 = xs , y1 = us,  col = "#77DD77")
+  legend("topleft" , c("With Partial correlation" , "With Pearson correlation" , "Person's correlation" , "Partial correlation") , col = c("#f5bf80" , "#77DD77","#CB3234" ,"white") , lty = 1 , lwd = 2 , bty = "n" )
+  points(mat1, col = "#CB3234", cex =  .3)
   
-  points(sort(pcor(data)$estimate), col = "green", cex =  .3)
+  points(mat2, col = "white", cex =  .3)
 }
-
+par(mfrow = c(1,2))
 relation_CI_par_pear(TD , bonferroni = T )
 relation_CI_par_pear(TD , bonferroni = F )
 
 
 ```
 
-												
+[<b>Partial correlation with Bonferroni adjustment</b>]{style="float:left;"} [<b>Partial correlation without Bonferroni adjustment</b>]{style="float:right;"}
 
-Partial Correlation
+<img src="images/brain_graph_partial_cor_bonf.gif" width="450" height="275"/> <img src="images/brain_graph_partial_cor_no_bonf.gif" width="450" height="275"/>
 
-<img src="images/brain_graph_partial_cor_bonf.gif" width="450" height="275" /> <img src="images/brain_graph_partial_cor_no_bonf.gif" width="450" height="275" />
+[<b>Difference graph with Bonferroni adjustment</b>]{style="float:left;"} [<b>Difference graph without Bonferroni adjustment</b>]{style="float:right;"}
 
-
-			
-		
-
-	
+<img src="images/delta_partial_bonf.gif" width="300" height="400"/> <img src="images/delta_partial_no_bonf.gif" align="right" width="300" height="400"/>
