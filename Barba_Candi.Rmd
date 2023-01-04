@@ -73,13 +73,14 @@ The eight cortical regions in the ABIDE dataset are:
 
 -   <font color="#ABCDEF"> Cerebellum </font>: is involved in muscle control, including balance and movement.
 
-[TODO] References
+[Reference of ABIDE](https://fcon_1000.projects.nitrc.org/indi/abide/)  where we got the above information.
+
 
 ## Pre-processed
 
 Since data were taken in different labs, it's worth seeing and removing the lab-specific effect. For instance, we can have a look at the distribution of fMRI at the same cortical region for two difference subjects in the same group but taken in a different laboratory.
 
-```{r data - preproocessing 1 , warning = FALSE}
+```{r data - preproocessing 1 , warning = FALSE , echo = FALSE}
 
 sub_1 <- td_sel$caltech_0051487$`2001`
 sub_2 <- td_sel$trinity_0050259$`2001`
@@ -122,13 +123,10 @@ asd_sel_scale <- scale_datasets_list(asd_sel)
 ## Pool Together
 
 To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data.
-For the continuation we take two different statistical summary.
+For the continuation we take median ( Index insensitive  to changes in scale that the  measurements can have) as the statistical summary to have more robustness in the analysis.
 
-- Median : As a robust position index insensitive to changes in scale that the  measurements can have
-
-- Standard deviation :as a relevant statistics in order to study ROI co-variation in variability.
- 
 We assumed within group double independence (across time and subjects), we will not consider the time dependency and so we treat the data as $i.i.d.$.
+
 
 ```{r data pool together }
 #### Mean by cell given list of datasets
@@ -173,18 +171,25 @@ Correlations might be used to examine the relationship between brain fMRI data. 
 
 First, we can have a look at the empirical distribution of the Pearson correlation coefficients within the groups. The distribution of correlations can provide insights into brain function and can be helpful to understand how different brain regions contribute to various cognitive processes.
 
-```{r histograms correlations coefficient, warning = FALSE}
+```{r histograms correlations coefficient, warning = FALSE , echo = FALSE}
 corr_distr_fun <- function(data_1 , data_2 , metric){
   pTD  <-  summary_dataset(data_1 , metric = metric)
   pASD <-  summary_dataset( data_2, metric = metric)
+  mat  <-  cor(pTD)
+  mat2 <-  cor(pASD)
+  upper_tri_1 <- upper.tri(mat)
+  mat_upper_tri_1 <- mat[upper_tri_1]
+  upper_tri_2 <- upper.tri(mat2)
+  mat_upper_tri_2 <- mat[upper_tri_2]
   par(mfrow = c(1,2))
-  hist(cor(pTD) ,
+  hist( mat_upper_tri_1,
        main = "Histograms of correlation \n coefficients for TD subject",
        xlab = expression(hat(rho)) , 
        border = "white" , 
        col = "#E52B50"  , freq = FALSE )
   box()
-  hist(cor(pASD) ,
+
+  hist(mat_upper_tri_2 ,
        main = "Histograms of correlation\n coefficients for ASD subject",
        xlab = expression(hat(rho)) , 
        border = "white" , 
@@ -194,7 +199,6 @@ corr_distr_fun <- function(data_1 , data_2 , metric){
 }
 
 corr_distr_fun(td_sel_scale , asd_sel_scale , metric = "median")
-corr_distr_fun(td_sel_scale , asd_sel_scale , metric = "sd")
 
 ```
 
@@ -216,14 +220,20 @@ whenever [−t, +t] ∩ Cj,k (α) = ∅ (the empty-set).
 ### Choice of the threshold t
 
 
-Since we care only about the strongness of the correlation between two areas we consider to slice the threshold t over the absolute values of percentiles of the distribution of $\rho$.
+Since we care only about the strongness of the correlation between two areas we consider slicing the threshold t over the absolute values of percentiles of the distribution of $\rho$.
 
-```{r quantile distributions , warning = FALSE}
+```{r quantile distributions , warning = FALSE , echo = FALSE}
 quantile_distr_func <- function(data1 , data2 , metric){
   pTD  <-  summary_dataset(data1 , metric = metric)
   pASD <-  summary_dataset(data2, metric = metric)
-  q1   <-  sort(abs(cor(pTD))) 
-  q2   <-  sort(abs(cor(pASD))) 
+  mat  <-  cor(pTD)
+  mat2 <-  cor(pASD)
+  upper_tri_1 <- upper.tri(mat)
+  mat_upper_tri_1 <- mat[upper_tri_1]
+  upper_tri_2 <- upper.tri(mat2)
+  mat_upper_tri_2 <- mat[upper_tri_2]
+  q1   <-  sort(abs(mat_upper_tri_1))
+  q2   <-  sort(abs(mat_upper_tri_2))
   par(mfrow = c(1,2))
   plot(q1 , main = "Quantile distribution of correlation \n  coefficient for TD subject", ylab = "Quantile" , 
        col = "#ffff66" , cex = .3)
@@ -234,8 +244,9 @@ quantile_distr_func <- function(data1 , data2 , metric){
   par(mfrow = c(1,1))
 }
 quantile_distr_func(td_sel_scale , asd_sel_scale , metric = "median")
-quantile_distr_func(td_sel_scale , asd_sel_scale , metric = "sd")
 ```
+
+
 We will slide t over the percentile from $\rho = 0 $  to $\rho = 0.7 $ showing the differences in the number of edges and discovering which edge will be more resilient.
 
 ### Process to compute the Confidence intervals
@@ -244,7 +255,7 @@ To compute confidence intervals for a family of correlation coefficients, we use
 
 $$\hat z_{j,k} = \frac{1}{2}log\big(\frac{1 + \hat\rho_{j,k}}{1 - \hat\rho_{j,k}}\big) = artanh(\hat\rho)$$
 
-where it is asymptotically normally distributed as a gaussian with mean $z_{j,k}$ and standard error $\frac{1}{\sqrt{N-3}}$
+where it is asymptotically normally distributed as a Gaussian with mean $z_{j,k}$ and standard error $\frac{1}{\sqrt{N-3}}$
 
 Once converted the correlations coefficients to z-scores, we can use the normal distribution to build confidence intervals, and then convert lower and upper bound back to the original scale by using the inverse of z-transformation.
 
@@ -329,7 +340,7 @@ lower_or_upper <- function(data, data2 = NULL , bound, cor_type='normal', bonfer
 
 ```
 
-By increasing the value of the threshold t we basically require a strongest correlation between the two regions.
+By increasing the value of the threshold t we basically require a strongest correlation between the two areas of the brain.
 
 We set the adjacency matrix as a (D x D) matrix where there is 1 if for the pair {j , k} the confidence interval intersect with the interval [-t ; t].
 
@@ -347,7 +358,7 @@ The graph is represented by G = (V, E) where V = {V1, . . . , VD} is the vertex-
 
 After all we can visualize the association graph for the two groups slicing the value of threshold t in order to see co-activation differences.
 
-```{r plot , warning = FALSE }
+```{r plot , warning = FALSE , echo = FALSE}
 plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='normal'){
   adj_mat_1 <- adj_matrix_func(mat_1, t = t, bonf=bonf, cor_type = cor_type)
   adj_mat_2 <- adj_matrix_func(mat_2, t = t, bonf=bonf, cor_type=cor_type)
@@ -426,32 +437,38 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
 
 ```
 
-Normal correlation
+Pearson correlation with Bonferroni adjustment
 
-<img src="images/brain_graph_normal_cor_bonf.gif" width="450" height="275" /> <img src="images/brain_graph_normal_cor_no_bonf.gif" width="450" height="275" />
+<img src="images/brain_graph_normal_cor_bonf.gif" width="450" height="275" /> 
 
-Partial Correlation
+Pearson correlation without Bonferroni adjustment
 
-<img src="images/brain_graph_partial_cor_bonf.gif" width="450" height="275" /> <img src="images/brain_graph_partial_cor_no_bonf.gif" width="450" height="275" />
+<img src="images/brain_graph_normal_cor_no_bonf.gif" width="450" height="275" />
+
+
 
 
 ### Explanation of the plots
 
-On the left we find the correlation graphs maded using Bonferroni adjustment and on the right without it.
-The plots represents the two graphs one for each group where:
+The plots above describe the association graphs built using Bonferroni correction and the ones below are built without 
 
--   each node represents a cortical region of the brain, the color of the nodes identify one of the eight main areas (previously explained ) it belongs.
+The plots represents the two association graph one for each group where:
 
--   each edge represents a strongest than the setted threshold t linear correlation between the two ares, the color of the edge has the following meaning:
+-   each node represents a cortical region of the brain, and the color of the nodes identifies one of the eight main areas (previously explained ) it belongs.
 
-    black: if both the two graph have the edge in common.
+-   each edge represents a strongest than the set threshold t linear correlation between the two areas, the color of the edge has the following meaning:
+
+    black: if both the two graphs have the edge in common.
 
     blue: if only the TD graph has the edge.
 
     red: if only the ASD graph has the edge.
     
-    
-Delta
+We can reformulate the problem looking at the difference graph $G^{\Delta}(t)}$
+
+
+
+
 
 <img src="images/delta_normal_bonf.gif" width="300" height="400" /> <img src="images/delta_normal_no_bonf.gif" width="300" height="400" />
 
@@ -566,7 +583,9 @@ relation_CI_par_pear(TD , bonferroni = F )
 
 												
 
+Partial Correlation
 
+<img src="images/brain_graph_partial_cor_bonf.gif" width="450" height="275" /> <img src="images/brain_graph_partial_cor_no_bonf.gif" width="450" height="275" />
 
 
 			
