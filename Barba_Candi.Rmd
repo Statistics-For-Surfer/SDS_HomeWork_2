@@ -1,6 +1,6 @@
 ---
-title: "Statistics for Data Science Homework 2"
-author: " Barba Paolo , Candi Matteo "
+title: "Statistics for Data Science - Homework 2"
+author: "Barba Paolo, Candi Matteo"
 
 output: 
   html_document:
@@ -22,11 +22,11 @@ if (requireNamespace("thematic"))
   thematic::thematic_rmd(font = "auto")
 ```
 
-```{r package}
+```{r package, message=FALSE}
 
-suppressMessages(library(jpeg))
-suppressMessages(library(ppcor))
-suppressMessages(library(igraph))
+library(jpeg)
+library(ppcor)
+library(igraph)
 
 
 ```
@@ -54,35 +54,38 @@ Brief explanation (Without being an expert) of what ABIDE dataset contains:
 
 -   fMRI measures brain activity by detecting changes in blood flow.
 
-The eight cortical regions in the ABIDE dataset are:
+The eight cortical regions in the ABIDE dataset are <i>(in parenthesis you find the begin number of the brain regions)</i>:
 
--   <font color="#77DD77"> Frontal lobe</font>: is involved in decision-making, planning, and problem-solving.
+-   <font color="#77DD77"> Frontal lobe ("2")</font>: is involved in decision-making, planning, and problem-solving.
 
--   <font color="#C8A2C8"> Insula lobe </font>: is involved sensory experience and emotional valence.
+-   <font color="#C8A2C8"> Insula lobe ("3")</font>: is involved sensory experience and emotional valence.
 
--   <font color="#FFFF66"> Limbic system </font>: is involved in behavioural and emotional responses.
+-   <font color="#FFFF66"> Limbic system ("4")</font>: is involved in behavioral and emotional responses.
 
--   <font color= "#CB3234"> Occipital lobe </font>: is involved in visual perception, including color, form, and motion.
+-   <font color= "#CB3234"> Occipital lobe ("5")</font>: is involved in visual perception, including color, form, and motion.
 
--   <font color="#E1E1E2"> Parietal lobe </font>: is responsible for sensory perception and integration, like taste, hearing, sight, touch, and smell.
+-   <font color="#E1E1E2"> Parietal lobe("6")</font>: is responsible for sensory perception and integration, like taste, hearing, sight, touch, and smell.
 
--   <font color="#ff8c69"> SCGM </font>: is involved in process information.
+-   <font color="#ff8c69"> SCGM ("7")</font>: is involved in process information.
 
--   <font color="#7fffd4"> Temporal lobe </font>: is involved in the retention of visual memory, language comprehension, and emotion association.
+-   <font color="#7FFFD4"> Temporal lobe ("8")</font>: is involved in the retention of visual memory, language comprehension, and emotion association.
 
--   <font color="#ABCDEF"> Cerebellum </font>: is involved in muscle control, including balance and movement.
+-   <font color="#ABCDEF"> Cerebellum ("9")</font>: is involved in muscle control, including balance and movement.
 
 [Reference of ABIDE](https://fcon_1000.projects.nitrc.org/indi/abide/) where we got the above information.
+
+For the plots we have used the coordinates of the 116 brain region from the [aal116coordinates](https://search.r-project.org/CRAN/refmans/JointNets/html/aal116coordinates.html) package.
 
 ## Pre-processed
 
 Since data were taken in different labs, it's worth seeing and removing the lab-specific effect. For instance, we can have a look at the distribution of fMRI at the same cortical region for two difference subjects in the same group but taken in a different laboratory.
 
-```{r data - preproocessing 1 , warning = FALSE , echo = FALSE , fig.width = 10}
+```{r data - preproocessing 1 , warning= FALSE , echo = FALSE , fig.width = 10}
 
 sub_1 <- td_sel$caltech_0051487$`2001`
 sub_2 <- td_sel$trinity_0050259$`2001`
-par(mfrow = c( 1, 2 ))
+
+par(mfrow = c( 1, 2 ), col='white', col.axis='white', col.lab='white', col.main='white', fg='white')
 hist(sub_1 , main = "Histogram of fMRI in the 2001 area \n subject 1",
      col = "#4682b4", border = "white" , freq = T , xlab = "fMRI result"
   
@@ -179,7 +182,7 @@ corr_distr_fun <- function(data_1 , data_2 , metric){
   mat_upper_tri_1 <- mat[upper_tri_1]
   upper_tri_2 <- upper.tri(mat2)
   mat_upper_tri_2 <- mat[upper_tri_2]
-  par(mfrow = c(1,2))
+  par(mfrow = c( 1, 2 ), col='white', col.axis='white', col.lab='white', col.main='white', fg='white')
   hist( mat_upper_tri_1,
        main = "Histograms of correlation \n coefficients for TD subject",
        xlab = expression(hat(rho)) , 
@@ -230,7 +233,7 @@ quantile_distr_func <- function(data1 , data2 , metric){
   mat_upper_tri_2 <- mat[upper_tri_2]
   q1   <-  sort(abs(mat_upper_tri_1))
   q2   <-  sort(abs(mat_upper_tri_2))
-  par(mfrow = c(1,2))
+  par(mfrow = c( 1, 2 ), col='white', col.axis='white', col.lab='white', col.main='white', fg='white')
   plot(q1 , main = "Quantile distribution of correlation \n  coefficient for TD subject", ylab = "Quantile" , 
        col = "#ffff66" , cex = .3)
   grid()
@@ -254,14 +257,12 @@ where it is asymptotically normally distributed as a Gaussian with mean $z_{j,k}
 
 Once converted the correlations coefficients to z-scores, we can use the normal distribution to build confidence intervals, and then convert lower and upper bound back to the original scale by using the inverse of z-transformation.
 
-Since we are dealing with family wise test, in order to control the probability of making at least one error we can adjust the $\alpha$ confidence level by using Bonferroni Correction. The confidence level would be divided by the number of correlations coefficient we are testing $\binom{D}{2} = \frac{116 \times 115}{2} = 6.670$.
+Since we are dealing with family wise test, in order to control the probability of making at least one error we can adjust the $\alpha$ confidence level by using Bonferroni Correction. The confidence level would be divided by the number of correlations coefficient we are testing $m = \binom{D}{2} = \frac{116 \times 115}{2} = 6.670$.
 
-The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. Since $\alpha_{bon}= \frac{\alpha}{m} = 0,0007$ the confidence intervals results wider, more often intersecting the interval $[-t, t]$ . It results on the conclusion of don't put edges between cortical regions where it should be.
+The Bonferroni adjustment is a conservative method, meaning that it tends to make error on the side of rejecting the null hypothesis. Since $\alpha_{BON}= \frac{\alpha}{m} = 0,0007$ the confidence intervals results wider, more often intersecting the interval $[-t, t]$ . It results on the conclusion of don't put edges between cortical regions where it should be.
 
 ```{r Confidence intervals }
 lower_or_upper <- function(data, data2 = NULL , bound, cor_type='normal', bonferroni=TRUE, delta = F ){
-  
-  
   
   #### Setting Parameters
   n <- dim(data)[1]
@@ -438,7 +439,7 @@ plot_graphs <- function(mat_1, mat_2, t, dimensions=2, bonf=TRUE, cor_type='norm
 
 ### Explanation of the plots
 
-The plots above describe the association graphs built using Bonferroni correction and the ones below are built without.
+The left plot describe the association graph built using Bonferroni correction and the one on the right is built without.
 
 The plots represents the two association graph one for each group where:
 
@@ -448,18 +449,15 @@ The plots represents the two association graph one for each group where:
 
     -   <font color="black">black</font>: if both the two graphs have the edge in common.
 
-
     -   <font color="blue">blue</font>: if only the TD graph has the edge.
-
-
 
     -   <font color="red">red</font> : if only the ASD graph has the edge.
 
-We can reformulate the problem looking at the difference graph $G^{\Delta}(t)$ where we put an edge if the asymptotic confidence interval of $|\rho_{j,k}^{ASD} - \rho_{j,k}^{TD}|$ intersect with the interval [-t;t]
+We can reformulate the problem looking at the difference graph $G^{\Delta}(t)$ where we put an edge if the asymptotic confidence interval of $|\rho_{j,k}^{ASD} - \rho_{j,k}^{TD}|$ do not intersect with the interval [-t;t].
 
 [<b>Difference graph with Bonferroni adjustment</b>]{style="float:left;"} [<b>Difference graph without Bonferroni adjustment</b>]{style="float:right;"}
 
-<img src="images/delta_normal_bonf.gif" width="300" height="400"/> <img src="images/delta_normal_no_bonf.gif" align="right" width="300" height="400"/>
+<img src="images/delta_normal_bonf.gif" width="250" height="300"/> <img src="images/delta_normal_no_bonf.gif" align="right" width="250" height="300"/>
 
 ### Statistical properties:
 
@@ -474,10 +472,11 @@ In the following graph we show the confidence intervals for Pearson's coefficien
 ```{r CIS PLOTS ,  warning = FALSE, fig.width = 10 , echo = FALSE}
 
 relation_CI <- function(data, cor_type='normal'){
-  a_norm <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= F)
-  b_norm <-  lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= F)
-  a_bonf <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= T)
-  b_bonf <- lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= T)
+  suppressWarnings(
+    {a_norm <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= F)
+    b_norm <-  lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= F)
+    a_bonf <-  lower_or_upper(data , bound ="L" , cor_type = cor_type , bonferroni= T)
+    b_bonf <- lower_or_upper(data , bound ="U" , cor_type = cor_type , bonferroni= T)})
   
   upper_tri_a_norm <- upper.tri(a_norm)
   upper_tri_b_norm <- upper.tri(b_norm)  
@@ -501,7 +500,7 @@ relation_CI <- function(data, cor_type='normal'){
   mat = sort(mat_upper_tri_1)
   
   
-  par(mfrow = c(1,1))
+  par(mfrow = c( 1, 1), col='white', col.axis='white', col.lab='white', col.main='white', fg='white')
   plot(ls, type = "n"  , main = expression(paste("Asyntotic confidence intervals of ", rho , " \n with & without Bonferroni correction")), 
        xlab = "" , ylab = "Lower and Upper Bound" , ylim = c(-1,1))
   segments(x0 = xs , y0 = ls_bon , x1 = xs , y1 = us_bon,  col = "lightblue")
@@ -548,10 +547,11 @@ Since the variance it's greater, the final confidence intervals will be wiser th
 ```{r plotssed2 ,  warning = FALSE , fig.width = 10 , echo = FALSE}
 
 relation_CI_par_pear <- function(data, bonferroni = T){
-  a_norm <-  lower_or_upper( data , bound = "L" , cor_type = 'normal' , bonferroni= bonferroni )
-  b_norm <-  lower_or_upper(data , bound = "U" , cor_type = 'normal' , bonferroni= bonferroni )
-  a_par <-  lower_or_upper(data , bound ="L" , cor_type = 'partial', bonferroni= bonferroni)
-  b_par <- lower_or_upper(data , bound ="U" , cor_type =   'partial' , bonferroni= bonferroni)
+  suppressWarnings({
+    a_norm <-  lower_or_upper( data , bound = "L" , cor_type = 'normal' , bonferroni= bonferroni )
+    b_norm <-  lower_or_upper(data , bound = "U" , cor_type = 'normal' , bonferroni= bonferroni )
+    a_par <-  lower_or_upper(data , bound ="L" , cor_type = 'partial', bonferroni= bonferroni)
+    b_par <- lower_or_upper(data , bound ="U" , cor_type =   'partial' , bonferroni= bonferroni)})
   
   upper_tri_a_norm <- upper.tri(a_norm)
   upper_tri_b_norm <- upper.tri(b_norm)  
@@ -571,7 +571,7 @@ relation_CI_par_pear <- function(data, bonferroni = T){
   xs <- 1:length(ls)
   
   mat  <-  cor(data)
-  mat2 <-  pcor(data)$estimate
+  suppressWarnings(mat2 <-  pcor(data)$estimate)
   upper_tri_1 <- upper.tri(mat)
   mat_upper_tri_1 <- mat[upper_tri_1]
   upper_tri_2 <- upper.tri(mat2)
@@ -582,8 +582,8 @@ relation_CI_par_pear <- function(data, bonferroni = T){
 
   
   
-  main = "Asyntotic confidence intervals for \n Partial  correlation coefficient without \n Bonferroni correction"
-  if(bonferroni){main = "Asyntotic confidence intervals for \n Partial  correlation coefficient with \n Bonferroni correction"}
+  main = "Asyntotic confidence intervals for \n Partial correlation coefficient without \n Bonferroni correction"
+  if(bonferroni){main = "Asyntotic confidence intervals for \n Partial correlation coefficient with \n Bonferroni correction"}
   
   
   
@@ -597,17 +597,14 @@ relation_CI_par_pear <- function(data, bonferroni = T){
   
   points(mat2, col = "white", cex =  .3)
 }
-par(mfrow = c(1,2))
+par(mfrow = c( 1, 2), col='white', col.axis='white', col.lab='white', col.main='white', fg='white')
 relation_CI_par_pear(TD , bonferroni = T )
 relation_CI_par_pear(TD , bonferroni = F )
 
 
 ```
 
-As we can see using Bonferroni correction the confidence intervals for $\rho_{j,k}^{(P)}$ always intersect with zero, meaning that, it will not be any edge in the association graph. 
-
-
-
+As we can see using Bonferroni correction the confidence intervals for $\rho_{j,k}^{(P)}$ always intersect with zero, meaning that, it will not be any edge in the association graph.
 
 We can highlight the structural difference in the association graph, built without using Bonferroni correction. It means that the actual difference between brain's connection for the two groups is not in a specif area but instead on the structure of the connections.
 
@@ -617,17 +614,10 @@ We can highlight the structural difference in the association graph, built witho
 
 This is completely justified by the below plots, where they shown the difference graph, with and without Bonferroni correction.
 
-
 [<b>Difference graph with Bonferroni adjustment</b>]{style="float:left;"} [<b>Difference graph without Bonferroni adjustment</b>]{style="float:right;"}
 
-<img src="images/delta_partial_bonf.gif" width="300" height="400"/> <img src="images/delta_partial_no_bonf.gif" align="right" width="300" height="400"/>
-
+<img src="images/delta_partial_bonf.gif" width="250" height="300"/> <img src="images/delta_partial_no_bonf.gif" align="right" width="250" height="300"/>
 
 ### Conclusion
 
-In conclusion, this study have found that subjects with autism tend to have differences in the way that different brain regions are connected and communicate with each other. These differences may be related to the problem solving and executive function.However, the brain changes associated with autism can vary from persono to person and a sample of twelve people per group may not catch all the actual differences that exist. 
-
-
-
-
-
+In conclusion, this study have found that subjects with autism tend to have differences in the way that different brain regions are connected and communicate with each other. These differences may be related to the problem solving and executive function. However, the brain changes associated with autism can vary from person to person and a sample of twelve people per group may not catch all the actual differences that exist.

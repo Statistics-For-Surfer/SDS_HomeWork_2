@@ -31,7 +31,7 @@ library(dplyr)
 library(tidyr)
 
 
-
+par(col='white')
 # LOAD DATA ---------------------------------------------------------------
 
 load('data/hw2_data.RData')
