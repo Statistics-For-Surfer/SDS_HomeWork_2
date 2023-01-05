@@ -14,4 +14,5 @@ The goal of the project is to analyze differences in fMRI (functional magnetic r
 * `Barba_Candi.html`: The html file of the project.
 * `Barba_Candi.Rmd` : The R markdown file of the project.
 * `Homework_02.pdf` : The pdf file text of the project
-* `data`: The Rdata used for the sake of the project
+* `data`: folder containing the Rdata used for the sake of the project
+* `gif`: folder containing gif file for the appropiate visualitation
