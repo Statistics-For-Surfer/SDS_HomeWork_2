@@ -558,7 +558,7 @@ asy_fun <- function(data , cor_type = "Pearson"){
     m <- pcor(data)$estimate[1,2]
     g <- D -2
   }
-  
+
   m <- (1/2)*log((1+m)/(1-m))
   sd <- 1 / sqrt(n -g -3)
   curve(dnorm(x, m , sd) , lwd = 3 , 
