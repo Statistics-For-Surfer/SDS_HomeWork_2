@@ -558,11 +558,12 @@ asy_fun <- function(data , cor_type = "Pearson"){
     m <- pcor(data)$estimate[1,2]
     g <- D -2
   }
-    
+  
+  m <- (1/2)*log((1+m)/(1-m))
   sd <- 1 / sqrt(n -g -3)
   curve(dnorm(x, m , sd) , lwd = 3 , 
         col = "cyan4" , main = paste("Asymptotic distribution for " , cor_type ,  "correlation") , xlim = c(m-2, m+2),
-        xlab = expression(rho) , ylab = expression(paste("f(", rho , ")" )))
+        xlab = "z" , ylab = expression(paste("f(z)" )))
   grid() 
 }
 par(mfrow = c(1,1))
