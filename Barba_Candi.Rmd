@@ -123,7 +123,7 @@ asd_sel_scale <- scale_datasets_list(asd_sel)
 
 ## Pool Together
 
-To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data. For the continuation we take median ( Index insensitive to changes in scale that the measurements can have) as the statistical summary to have more robustness in the analysis.
+To achieve the goal of enhance the separation between ASD and TD subjects, we pool the data within each group, by taking a statistical summary across subject on a per-time and per ROI data. Since we will use both the Pearson's and partial correlation coefficients, that they are sensitive to outliers, which can have a significant impact on the results, we take median ( Index insensitive to changes in scale that the measurements can have) as the statistical summary to have more robustness in the analysis.
 
 We assumed within group double independence (across time and subjects), we will not consider the time dependency and so we treat the data as $i.i.d.$.
 
@@ -536,13 +536,45 @@ Partial correlation is a measure of the linear association between two variables
 
 Partial correlation is a measure of the strength and direction of the relationship between two variables, taking into account the effects of one or more other variables. It is useful for understanding the relationship between two variables when there are other variables that might be influencing that relationship.
 
-To compute confidence intervals for a family of correlation coefficients, we still used the Fisher's Z transformation.
+
+
+To compute confidence intervals for a family of partial correlation coefficients, we still used the Fisher's Z transformation.
 
 $$\hat z_{j,k} = \frac{1}{2}log\big(\frac{1 + \hat\rho_{j,k}^{(P)}}{1 - \hat\rho_{j,k}^{(P)}}\big) = artanh(\hat\rho_{j,k}^{(P)})$$
 
 where it is asymptotically normally distributed as a Gaussian with mean $z_{j,k}$ and standard deviation $\frac{1}{\sqrt{N-g-3}}$ where : $g = (D-2)$.
 
-Since the variance it's greater, the final confidence intervals will be wiser than the ones built using Pearson's correlation.
+
+We can have a look at one asymptotic distribution of Fisher's Z transformation $\hat{z}_{j,k}$ for both Pearson's correlation coefficient $\hat{\rho}$ and Partial correlation coefficient $\hat{\rho}^{(P)}$ 
+
+```{r asymp distribution ,  warning = FALSE , fig.width = 10 , echo = FALSE}
+
+asy_fun <- function(data , cor_type = "Pearson"){
+  n <- dim(data)[1]
+  D <- dim(data)[2] 
+  m <- cor(data)[1,2]
+  g <- 0
+  if (cor_type == 'partial'){
+    m <- pcor(data)$estimate[1,2]
+    g <- D -2
+  }
+    
+  sd <- 1 / sqrt(n -g -3)
+  curve(dnorm(x, m , sd) , lwd = 3 , 
+        col = "cyan4" , main = paste("Asymptotic distribution for " , cor_type ,  "correlation") , xlim = c(m-2, m+2),
+        xlab = expression(rho) , ylab = expression(paste("f(", rho , ")" )))
+  grid() 
+}
+par(mfrow = c(1,1))
+asy_fun(ASD)
+asy_fun(ASD, cor_type = 'partial')
+
+```
+
+
+The asymptotic analysis with Fisher transformation for partial correlation produces a larger variance, resulting in wider confidence intervals compared to those obtained using Pearson's correlation. Data are not sufficient to distinguish between the signal and the noise. This leads to an inability to differentiate between the two groups using partial correlation with asymptotic Fisher transformation.
+
+
 
 ```{r plotssed2 ,  warning = FALSE , fig.width = 10 , echo = FALSE}
 
@@ -592,7 +624,7 @@ relation_CI_par_pear <- function(data, bonferroni = T){
   
   segments(x0 = xs , y0 = ls_par , x1 = xs , y1 = us_par,  col = "#f5bf80")
   segments(x0 = xs , y0 = ls , x1 = xs , y1 = us,  col = "#77DD77")
-  legend("topleft" , c("With Partial correlation" , "With Pearson correlation" , "Person's correlation" , "Partial correlation") , col = c("#f5bf80" , "#77DD77","#CB3234" ,"white") , lty = 1 , lwd = 2 , bty = "n" )
+  legend("topleft" , c("CI With Partial correlation" , "CI With Pearson correlation" , "Pearson's coefficient" , "Partial coefficient") , col = c("#f5bf80" , "#77DD77","#CB3234" ,"white") , lty = 1 , lwd = 2 , bty = "n" )
   points(mat1, col = "#CB3234", cex =  .3)
   
   points(mat2, col = "white", cex =  .3)
