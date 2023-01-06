@@ -8,7 +8,7 @@ The goal of the project is to analyze differences in fMRI (functional magnetic r
 * Paolo Barba
 * Matteo Candi
 
-### *Content*:
+### *Structure*:
 
 
 * `brain.html`: The html file of the project.
