@@ -20,4 +20,3 @@ This repository contains:
 * `Homework_02.pdf` : The pdf file text of the project.
 * `data`: folder containing the Rdata used for the sake of the project.
 * `images`: folder containing gif file for an appropiate visualitation.
-
